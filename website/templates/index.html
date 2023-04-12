@@ -1,0 +1,80 @@
+
+{% extends 'base.html' %}
+
+{% block title %}Home Page{% endblock %}
+
+{% block content %}
+
+  <body>
+    <header class="header sticky">
+      <a href="#">
+        <img class="logo" alt="W15DOM logo" src="{{ url_for('static', filename='images/w15domlogo.png') }}" />
+      </a>
+
+      <nav class="main-nav">
+        <ul class="main-nav-list">
+          <li><a class="main-nav-link" href="#">Home</a></li>
+          <li><a class="main-nav-link" href="#about-us">About us</a></li>
+          <li><a class="main-nav-link" href="/login">Join now</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main>
+      <section class="section-hero">
+        <h1 class="heading-primary">
+          A fun way to collect your games!
+            </h1>
+        <div class="hero">
+          <div class="hero-text-box">
+            
+            <p class="hero-description">Starting being a game pro by managing your data!
+            </p>
+            <a href="#signup" class="btn btn--full margin-right-sm"
+              >Sign up Now!</a
+            >
+            <a href="#how" class="btn btn--outline">Learn more &darr;</a>
+          </div>
+        </div>
+        </section>
+
+        <section class="section-color features">
+          <div class="container">
+          <span> Ninetendo Playstation XBOX</span>
+        </div>
+        </section>
+
+        <section class="section-color about-us" id="signup">
+          <div class="container">
+          <span> What we are, who we are</span>
+        </div>
+        </section>
+        <section class="section-color">
+          <div class="container">
+            <div class="sign">
+              <div class="sign-text-box">
+                <h2 class="heading-secondary">Register Account</h2>
+              
+              <div>
+                <form class="sign-form" method="POST" action="#">
+                  <div>
+                    <label for="email">Email<br></label>
+                    <input id="email" name="email" type="text" class="email-field" placeholder="ex: me@example.com" required>
+                  </div>
+                  <div>
+                    <label for="username">Username<br></label>
+                    <input id="username" type="text" name="name" class="username-field" placeholder="ex: MrPotatoChip" required>
+                  </div>
+                  <div class="last-input">
+                    <label for="password">Password<br></label>
+                    <input id="password" type="password" name="password" placeholder="do not share!" required>
+                  </div>
+                  <button class="btn-sign" type="submit">Register<br></button>
+                </form>
+              </div>                
+          </div>
+        </section>
+</body>
+</html>
+
+{% endblock %}

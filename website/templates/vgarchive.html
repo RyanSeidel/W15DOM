@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}Archive Page{% endblock %}
+
+{% block content %}
+  <body>
+
+    <header class="header ">
+      <div class="logo-container">
+        <a href="#">
+          <img class="logo" alt="W15DOM logo" src="{{ url_for('static', filename='images/w15domlogo.png') }}" />
+        </a>
+      </div>
+  
+      <nav class="home-nav">
+        <ul class="home-nav-list">
+          <li><a class="home-nav-link" href="/home">Timeline</a></li>
+          <li><a class="home-nav-link text-line" href="#">Archive</a></li>
+          <li><a class="home-nav-link" href="/message">Messages</a></li>
+          <li><a class="home-nav-link" href="/account">My Account</a></li>
+          <li><a class="home-nav-link" href="/help">Help</a></li>
+          <li><a class="home-nav-link" href="/logout">Logout</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="Game-title">
+    <h1>WI5DOM Game Archive</h1>
+    </div>
+    <div class="archive">
+    <form id="game-form" method="POST" action="{{ url_for('auth.vgarchive') }}">
+      <input type="hidden" id="game-id" value=""> <!-- Add this hidden input field -->
+      <label for="name">Name:</label>
+      <input type="text" id="name" name="name">
+      <label for="genre">Genre:</label>
+      <input type="text" id="genre" name="genre">
+      <label for="console">Console:</label>
+      <input type="text" id="console" name="console">
+      <label for="completed">Completed:</label>
+      <input type="checkbox" id="completed" name="completed">
+      <label for="recommend">Recommend:</label>
+      <input type="checkbox" id="recommend" name="recommend">
+      <button type="submit">Add Game</button>
+    </form>
+    </div>
+    <table id="game-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Genre</th>
+          <th>Console</th>
+          <th>Completed</th>
+          <th>Recommend</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for game in games %}
+        <tr>
+          <td>{{ game.name }}</td>
+          <td>{{ game.genre }}</td>
+          <td>{{ game.console }}</td>
+          <td>{{ 'Yes' if game.completed else 'No' }}</td>
+          <td>{{ 'Yes' if game.recommend else 'No' }}</td>
+          <td>
+            <!-- You can add edit and delete functionality here later -->
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+   
+  </body>
+</html>
+{% endblock %}

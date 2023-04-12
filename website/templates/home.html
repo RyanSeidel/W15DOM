@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+  <header class="header ">
+    <div class="logo-container">
+      <a href="#">
+        <img class="logo" alt="W15DOM logo" src="{{ url_for('static', filename='images/w15domlogo.png') }}" />
+      </a>
+    </div>
+
+    <nav class="home-nav">
+      <ul class="home-nav-list">
+        <li><a class="home-nav-link text-line" href="#">Timeline</a></li>
+        <li><a class="home-nav-link" href="/archive">Archive</a></li>
+        <li><a class="home-nav-link" href="/message">Messages</a></li>
+        <li><a class="home-nav-link" href="/account">My Account</a></li>
+        <li><a class="home-nav-link" href="/help">Help</a></li>
+        <li><a class="home-nav-link" href="/logout">Logout</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <h1> Welcome to the Timeline {{ username }}! </h1>
+
+  <form class="search-form" action="{{ url_for('views.home') }}" method="POST">
+    {{ form.csrf_token }}
+    {{ form.search.label }} {{ form.search(id='search-input') }} {{ form.submit(id='submit-btn') }}
+
+    <!-- Add this button element -->
+    <button id="toggle-games-btn" type="submit" name="toggle-games-btn" data-show-games="{% if session.show_games %}true{% else %}false{% endif %}">
+      {% if session.show_games %}
+        Hide My Games
+      {% else %}
+        Show My Games
+      {% endif %}
+    </button>        
+</form>
+
+
+  {% if session.show_games %}
+  <div class="container"> 
+    <div class="game-lists">
+      <div class="game-list">
+          <h2>Your Games</h2>
+          {% if games %}
+            {% for game, playtime in games %}
+              <div class="game">
+                <h3>{{ game.name }}</h3>
+                <p> Genre: {{ game.genre }}</p>
+                <p>Platform: {{ game.console }}</p>
+                <p>Playtime: {{ playtime }} minutes</p>
+                <p>Recommended: {{ game.recommend }}</p>
+              </div>
+            {% endfor %}
+            {% else %}
+            <p>No games found based on your search query</p>
+          {% endif %}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endblock %}
