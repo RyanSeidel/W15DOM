@@ -3,11 +3,13 @@
 
 {% block title %}Home Page{% endblock %}
 
-{% block content %}
+{% block header %}
+{% endblock %}
 
+{% block content %}
   <body>
     <header class="header sticky">
-      <a href="#">
+      <a href="/">
         <img class="logo" alt="W15DOM logo" src="{{ url_for('static', filename='images/w15domlogo.png') }}" />
       </a>
 
@@ -56,7 +58,7 @@
                 <h2 class="heading-secondary">Register Account</h2>
               
               <div>
-                <form class="sign-form" method="POST" action="#">
+                <form class="sign-form" method="POST">
                   <div>
                     <label for="email">Email<br></label>
                     <input id="email" name="email" type="text" class="email-field" placeholder="ex: me@example.com" required>

@@ -33,6 +33,7 @@
     <script defer src="{{ url_for('static', filename='script.js') }}"></script>
 
     <title>{% block title %}My Website{% endblock %}</title>
+    {% block header %}{% endblock %}
   </head>
   <body>
     {% block content %}{% endblock %}
