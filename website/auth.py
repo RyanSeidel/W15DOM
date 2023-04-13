@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, session
+from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, session, make_response
 from flask_login import login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from website.model import db, userinfo, Game, UserGame, Platform
@@ -7,6 +7,7 @@ import requests
 
 
 auth = Blueprint('auth', __name__)
+
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
@@ -33,23 +34,35 @@ def signup():
         return redirect(url_for('views.home'))
 
     if request.method == 'POST':
-        email = request.form.get('email')
-        name = request.form.get('name')
-        password = request.form.get('password')
+        data = request.json
+        email = data.get('email')
+        name = data.get('name')
+        password = data.get('password')
 
         if not email or not name or not password:
             flash('Please fill in all the fields', category='error')
             return redirect(url_for('auth.signup'))
 
-        user = userinfo.query.filter_by(email=email).first()
-        if user:
+        user_email = userinfo.query.filter_by(email=email).first()
+        if user_email:
             flash('Email already exists', category='error')
-        else:
-            new_user = userinfo(email=email, name=name, password=generate_password_hash(password, method='sha256'))
-            db.session.add(new_user)
-            db.session.commit()
-            flash('Account created', category='success')
-            return redirect(url_for('auth.login'))
+            return jsonify({'message': 'error',
+                            'value': 'Email already in use'})
+
+        user_name = userinfo.query.filter_by(name=name).first()
+        if user_name:
+            flash('Username already exists', category='error')
+            return jsonify({'message': 'error',
+                            'value': 'Username already in use'})
+
+        new_user = userinfo(email=email, name=name, password=generate_password_hash(
+            password, method='sha256'))
+        db.session.add(new_user)
+        db.session.commit()
+        flash('Account created', category='success')
+        # return redirect(url_for('auth.login'))
+        return jsonify({'message': 'success',
+                        'value': 'login'})
 
     return render_template('index.html')
 
@@ -71,7 +84,8 @@ def vgarchive():
         completed = 'completed' in request.form
         recommend = 'recommend' in request.form
 
-        new_game = Game(user_id=current_user.get_id(), name=name, genre=genre, console=console, completed=completed, recommend=recommend)
+        new_game = Game(user_id=current_user.get_id(), name=name, genre=genre,
+                        console=console, completed=completed, recommend=recommend)
         db.session.add(new_game)
         db.session.commit()
 
@@ -80,6 +94,7 @@ def vgarchive():
 
     games = Game.query.filter_by(user_id=current_user.get_id()).all()
     return render_template('vgarchive.html', games=games)
+
 
 @auth.route('/add_game', methods=['POST'])
 @login_required
@@ -90,11 +105,13 @@ def add_game():
     console = data['console']
     completed = data['completed']
     recommend = data['recommend']
-    
-    game = Game(user_id=current_user.id, name=name, genre=genre, console=console, completed=completed, recommend=recommend)
+
+    game = Game(user_id=current_user.id, name=name, genre=genre,
+                console=console, completed=completed, recommend=recommend)
     db.session.add(game)
     db.session.commit()
     return jsonify({"success": True})
+
 
 @auth.route('/get_game/<int:game_id>', methods=['GET'])
 @login_required
@@ -113,6 +130,7 @@ def get_game(game_id):
     else:
         return jsonify({"success": False})
 
+
 @auth.route('/update_game/<int:game_id>', methods=['PUT'])
 @login_required
 def update_game(game_id):
@@ -129,6 +147,7 @@ def update_game(game_id):
     else:
         return jsonify({"success": False})
 
+
 @auth.route('/delete_game/<int:game_id>', methods=['DELETE'])
 @login_required
 def delete_game(game_id):
@@ -139,19 +158,22 @@ def delete_game(game_id):
         return jsonify({"success": True})
     else:
         return jsonify({"success": False})
-    
+
+
 @auth.route('/get_games', methods=['GET'])
 @login_required
 def get_games():
     steam_id = session.get('steam_user', {}).get('steamid')
     if steam_id:
         get_owned_games(steam_id)
-        db.session.commit() # wait for get_owned_games to complete
+        db.session.commit()  # wait for get_owned_games to complete
         games = Game.query.join(Platform).filter_by(key=steam_id).all()
-        games = [{'id': game.id, 'name': game.name, 'genre': game.genre, 'console': game.console, 'completed': game.completed, 'recommend': game.recommend} for game in games]
+        games = [{'id': game.id, 'name': game.name, 'genre': game.genre, 'console': game.console,
+                  'completed': game.completed, 'recommend': game.recommend} for game in games]
     else:
         games = Game.query.filter_by(user_id=current_user.get_id()).all()
-        games = [{'id': game.id, 'name': game.name, 'genre': game.genre, 'console': game.console, 'completed': game.completed, 'recommend': game.recommend} for game in games]
+        games = [{'id': game.id, 'name': game.name, 'genre': game.genre, 'console': game.console,
+                  'completed': game.completed, 'recommend': game.recommend} for game in games]
     return jsonify(games)
 
 
@@ -164,10 +186,12 @@ def add_user_game():
     platform_id = data['platform_id']
     user_id = current_user.get_id()
 
-    existing_user_game = UserGame.query.filter_by(game_id=game_id, platform_id=platform_id, user_id=user_id).first()
+    existing_user_game = UserGame.query.filter_by(
+        game_id=game_id, platform_id=platform_id, user_id=user_id).first()
 
     if existing_user_game is None:
-        new_user_game = UserGame(game_id=game_id, platform_id=platform_id, user_id=user_id)
+        new_user_game = UserGame(
+            game_id=game_id, platform_id=platform_id, user_id=user_id)
         db.session.add(new_user_game)
 
         db.session.commit()
@@ -176,19 +200,22 @@ def add_user_game():
     else:
         return jsonify({"success": False})
 
+
 @auth.route('/remove_user_game', methods=['DELETE'])
 @login_required
 def remove_user_game():
     data = request.get_json()
     game_id = data['game_id']
     platform_id = data['platform_id']
-    user_game = UserGame.query.filter_by(user_id=current_user.id, game_id=game_id, platform_id=platform_id).first()
+    user_game = UserGame.query.filter_by(
+        user_id=current_user.id, game_id=game_id, platform_id=platform_id).first()
     if user_game:
         db.session.delete(user_game)
         db.session.commit()
         return jsonify({"success": True})
     else:
         return jsonify({"success": False, "error": "User game does not exist"})
+
 
 @auth.route('/get_user_games', methods=['GET'])
 @login_required
@@ -214,7 +241,8 @@ def get_user_games():
 @auth.route('/delete_user_game/<int:user_game_id>', methods=['DELETE'])
 @login_required
 def delete_user_game(user_game_id):
-    user_game = UserGame.query.filter_by(id=user_game_id, user_id=current_user.id).first()
+    user_game = UserGame.query.filter_by(
+        id=user_game_id, user_id=current_user.id).first()
     if user_game:
         db.session.delete(user_game)
         db.session.commit()
@@ -222,9 +250,11 @@ def delete_user_game(user_game_id):
     else:
         return jsonify({"success": False})
 
+
 @auth.route("/steam_login")
 def steam_login():
     return redirect(f"https://steamcommunity.com/openid/login?openid.ns=http://specs.openid.net/auth/2.0&openid.mode=checkid_setup&openid.return_to={url_for('auth.authorized', _external=True)}&openid.realm={request.host_url}&openid.ns.sreg=http://openid.net/extensions/sreg/1.1&openid.claimed_id=http://specs.openid.net/auth/2.0/identifier_select&openid.identity=http://specs.openid.net/auth/2.0/identifier_select")
+
 
 @auth.route("/authorized")
 @login_required
@@ -236,17 +266,19 @@ def authorized():
     user = current_user
 
     # Check if a platform with the given steam_id already exists for the user
-    existing_platform = Platform.query.filter_by(user_id=user.id, name='Steam').first()
+    existing_platform = Platform.query.filter_by(
+        user_id=user.id, name='Steam').first()
 
     if existing_platform is None:
         # Create a new platform object and add it to the user's list of connected platforms
-        platform = Platform(name='Steam', user_id=user.id, connected=True, key=steam_id)
+        platform = Platform(name='Steam', user_id=user.id,
+                            connected=True, key=steam_id)
         user.platforms.append(platform)
     else:
         # Update the existing platform with the new values
         existing_platform.connected = True
         existing_platform.key = steam_id
-        
+
         # Set a session variable to remember that the user has connected their Steam account
         session["steam_connected"] = existing_platform.connected
 
@@ -265,25 +297,3 @@ def steam_disconnect():
     session.pop('steam_user', None)
     flash('You have successfully disconnected your Steam account.', category='success')
     return redirect(url_for('views.account'))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

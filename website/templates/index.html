@@ -3,11 +3,45 @@
 
 {% block title %}Home Page{% endblock %}
 
-{% block content %}
+{% block header %}
+<script>
+  function onRegisterAttempt() {
+    
+    console.log(document.getElementById("email").value.length)
 
+    const data = {
+    name: document.getElementById("username").value,
+    email: document.getElementById("email").value,
+    password: document.getElementById("password").value
+    };
+
+    fetch("/", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    })
+  .then(response => response.json())
+  .then(data => {
+        if(data.message === "error"){
+        document.getElementById("register-error").innerHTML = "Error: "+data.value
+        }
+        if(data.message === "success"){
+          window.location.href = "/login"
+        }
+      })
+  .catch(error => {
+  console.error('Error:', error);
+  });
+}
+</script>
+{% endblock %}
+
+{% block content %}
   <body>
     <header class="header sticky">
-      <a href="#">
+      <a href="/">
         <img class="logo" alt="W15DOM logo" src="{{ url_for('static', filename='images/w15domlogo.png') }}" />
       </a>
 
@@ -54,9 +88,10 @@
             <div class="sign">
               <div class="sign-text-box">
                 <h2 class="heading-secondary">Register Account</h2>
+                <h2 style="color:rgb(139, 16, 16)" id="register-error"></h2>
               
               <div>
-                <form class="sign-form" method="POST" action="#">
+                <form class="sign-form" action="javascript:onRegisterAttempt()">
                   <div>
                     <label for="email">Email<br></label>
                     <input id="email" name="email" type="text" class="email-field" placeholder="ex: me@example.com" required>
