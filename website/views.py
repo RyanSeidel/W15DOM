@@ -31,9 +31,13 @@ def home():
     form.search_filter.choices = filter_choices
 
     # Querying for user's games ordered by playtime in descending order
-    all_games = Game.query.outerjoin(UserGame, (UserGame.user_id == current_user.id) & (UserGame.game_id == Game.id))\
-                       .with_entities(Game, UserGame.playtime)\
-                       .order_by(UserGame.playtime.desc().nullslast(), Game.name).all()
+    all_games = Game.query\
+    .join(UserGame, Game.id == UserGame.game_id)\
+    .filter(UserGame.user_id == current_user.id)\
+    .with_entities(Game, UserGame.playtime)\
+    .order_by(UserGame.playtime.desc().nullslast(), Game.name)\
+    .all()
+
 
 
     games = all_games
