@@ -128,6 +128,7 @@ def authorized():
 
 
 
+
 @auth.route('/steam_disconnect', methods=['POST'])
 @login_required
 def steam_disconnect():

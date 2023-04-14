@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, session, flash, redirect,
 from flask_login import login_required, current_user
 from website.model import Game, UserGame, Platform, db
 from .forms import SearchForm
+from website.steam import steam_api, api_key, get_owned_games
 import difflib
 
 # Creating a Blueprint for views
@@ -11,16 +12,6 @@ views = Blueprint('views', __name__)
 @views.route('/')
 def index():
     return render_template('index.html')
-
-# Route for the home page, handling both GET and POST requests
-import difflib
-from flask import Blueprint, render_template, request, session
-from flask_login import login_required, current_user
-from website.model import Game, UserGame, Platform, db
-from .forms import SearchForm
-
-# Creating a Blueprint for views
-views = Blueprint('views', __name__)
 
 # Route for the home page, handling both GET and POST requests
 @views.route('/home', methods=['GET', 'POST'])
@@ -37,8 +28,6 @@ def home():
     .with_entities(Game, UserGame.playtime)\
     .order_by(UserGame.playtime.desc().nullslast(), Game.name)\
     .all()
-
-
 
     games = all_games
     search_string = ''  # Initialize the search_string variable
@@ -195,8 +184,6 @@ def add_game():
 
     return jsonify({'success': True})
 
-
-
 # Route for the help page
 @views.route('/help')
 @login_required
@@ -212,4 +199,14 @@ def message():
 @views.route('/account')
 @login_required
 def account():
-    return render_template('account.html')
+    user_platforms = current_user.platforms
+    steam_connected = False
+
+    for platform in user_platforms:
+        if platform.name == 'Steam' and platform.connected:
+            steam_connected = True
+            get_owned_games(platform_key=platform.key)
+            break
+
+    return render_template('account.html', steam_connected=steam_connected)
+
