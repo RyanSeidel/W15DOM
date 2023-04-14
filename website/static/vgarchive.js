@@ -139,18 +139,21 @@ $(document).ready(function () {
             updateGame(game_id, null, null, null, true, recommend === "Yes");
           }
         });
-      } else {
-        showDialogBox("Is the game completed?", function(response1) {
+      } 
+      // Prompt the user if the game is recommended
+      if (completed === "Yes" && recommend === "No") {
+        showDialogBox("Do you recommend this game?", function(response1) {
           if (response1 === "yes") {
             showDialogBox("Would you recommend this game?", function(response2) {
               if (response2 === "yes" || response2 === "no") {
-                updateGame(game_id, null, null, null, response1 === "yes", response2 === "yes");
+                updateGame(game_id, null, null, null, true, response2 === "yes");
               }
             });
           }
         });
       }
     });
+    
      
 
     $(document).on("click", ".delete", function () {
