@@ -132,30 +132,17 @@ $(document).ready(function () {
       var completed = $(this).attr("data-completed");
       var recommend = $(this).attr("data-recommend");
     
-      // Prompt the user if the game is not completed
-      if (completed === "No") {
-        showDialogBox("Is the game completed?", function(response) {
-          if (response === "yes") {
-            updateGame(game_id, null, null, null, true, recommend === "Yes");
-          }
-        });
-      } 
-      // Prompt the user if the game is recommended
-      if (completed === "Yes" && recommend === "No") {
-        showDialogBox("Do you recommend this game?", function(response1) {
-          if (response1 === "yes") {
-            showDialogBox("Would you recommend this game?", function(response2) {
-              if (response2 === "yes" || response2 === "no") {
-                updateGame(game_id, null, null, null, true, response2 === "yes");
-              }
-            });
-          }
-        });
-      }
+      showDialogBox("Is the game completed?", function(response1) {
+        if (response1 === "yes" || response1 === "no") {
+          showDialogBox("Would you recommend this game?", function(response2) {
+            if (response2 === "yes" || response2 === "no") {
+              updateGame(game_id, null, null, null, response1 === "yes", response2 === "yes");
+            }
+          });
+        }
+      });
     });
     
-     
-
     $(document).on("click", ".delete", function () {
       var game_id = $(this).attr("data-id");
     
@@ -166,7 +153,7 @@ $(document).ready(function () {
           var game = response.game;
           console.log(game); // Add this line to inspect the game object
     
-          if (game.platform.toLowerCase() === "steam") {
+          if (game.pltoLowerCase() === "steam") {
             showDialogBox("You cannot delete a Steam game.", null);
           } else {
             showDialogBox("Are you sure you want to delete this game?", function(response) {
