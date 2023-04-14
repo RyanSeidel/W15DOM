@@ -10,6 +10,7 @@ from sqlalchemy import exists, and_
 auth = Blueprint('auth', __name__)
 
 
+#  Login Feature 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -28,7 +29,7 @@ def login():
 
     return render_template('login.html')
 
-
+# Registration Feature
 @auth.route('/', methods=['GET', 'POST'])
 def signup():
     if current_user.is_authenticated:
@@ -67,211 +68,21 @@ def signup():
 
     return render_template('index.html')
 
-
+# Logout Feature
 @auth.route('/logout')
 @login_required
 def logout():
     logout_user()
     return render_template('index.html')
 
-
-@auth.route('/vgarchive', methods=['GET', 'POST'])
+# Get all games
+@auth.route('/get_all_games', methods=['GET'])
 @login_required
-def vgarchive():
-    if request.method == 'POST':
-        name = request.form.get('name')
-        genre = request.form.get('genre')
-        console = request.form.get('console')
-        completed = 'completed' in request.form
-        recommend = 'recommend' in request.form
-
-        new_game = Game(user_id=current_user.get_id(), name=name, genre=genre,
-                        console=console, completed=completed, recommend=recommend)
-        db.session.add(new_game)
-        db.session.commit()
-
-        flash('Game added successfully', category='success')
-        return redirect(url_for('auth.vgarchive'))
-
+def get_all_games():
     games = Game.query.filter_by(user_id=current_user.get_id()).all()
-    return render_template('vgarchive.html', games=games)
-
-
-@auth.route('/add_game', methods=['POST'])
-@login_required
-def add_game():
-    data = request.get_json()
-    name = data['name']
-    genre = data['genre']
-    console = data['console']
-    completed = data['completed']
-    recommend = data['recommend']
-
-    game = Game(user_id=current_user.id, name=name, genre=genre,
-                console=console, completed=completed, recommend=recommend)
-    db.session.add(game)
-    db.session.commit()
-    return jsonify({"success": True})
-
-
-@auth.route('/get_game/<int:game_id>', methods=['GET'])
-@login_required
-def get_game(game_id):
-    game = Game.query.filter_by(id=game_id, user_id=current_user.id).first()
-    if game:
-        game_data = {
-            'id': game.id,
-            'name': game.name,
-            'genre': game.genre,
-            'console': game.console,
-            'completed': game.completed,
-            'recommend': game.recommend
-        }
-        return jsonify({"game": game_data, "success": True})
-    else:
-        return jsonify({"success": False})
-
-
-@auth.route('/update_game/<int:game_id>', methods=['PUT'])
-@login_required
-def update_game(game_id):
-    data = request.get_json()
-    game = Game.query.filter_by(id=game_id, user_id=current_user.id).first()
-    if game:
-        game.name = data['name']
-        game.genre = data['genre']
-        game.console = data['console']
-        game.completed = data['completed']
-        game.recommend = data['recommend']
-        db.session.commit()
-        return jsonify({"success": True})
-    else:
-        return jsonify({"success": False})
-
-
-@auth.route('/delete_game/<int:game_id>', methods=['POST'])
-@login_required
-def delete_game(game_id):
-    # Get the current user from the database
-    user = current_user
-
-    # Find the game with the given id for the current user
-    game = Game.query.filter_by(user_id=user.id, id=game_id).first()
-
-    if game:
-        # Delete the corresponding rows in the user_game table
-        user_game_subq = UserGame.query.filter(and_(
-            UserGame.game_id == game.id,
-            exists().where(and_(
-                UserGame.user_id == userinfo.id,
-                userinfo.steam_id == game.platform.steam_id
-            ))
-        ))
-        db.session.query(UserGame).filter(user_game_subq).delete(synchronize_session=False)
-
-        # Delete the game
-        db.session.delete(game)
-        db.session.commit()
-
-        flash(f"You have successfully deleted the game '{game.name}'.", category='success')
-    else:
-        flash('The game you are trying to delete was not found or does not belong to you.', category='danger')
-
-    return redirect(url_for('views.library'))
-
-
-
-
-
-@auth.route('/get_games', methods=['GET'])
-@login_required
-def get_games():
-    steam_id = session.get('steam_user', {}).get('steamid')
-    if steam_id:
-        get_owned_games(steam_id)
-        db.session.commit()  # wait for get_owned_games to complete
-        games = Game.query.join(Platform).filter_by(key=steam_id).all()
-        games = [{'id': game.id, 'name': game.name, 'genre': game.genre, 'console': game.console,
-                  'completed': game.completed, 'recommend': game.recommend} for game in games]
-    else:
-        games = Game.query.filter_by(user_id=current_user.get_id()).all()
-        games = [{'id': game.id, 'name': game.name, 'genre': game.genre, 'console': game.console,
-                  'completed': game.completed, 'recommend': game.recommend} for game in games]
+    games = [{'id': game.id, 'name': game.name, 'genre': game.genre, 'console': game.console,
+              'completed': game.completed, 'recommend': game.recommend} for game in games]
     return jsonify(games)
-
-
-@auth.route('/add_user_game', methods=['POST'])
-@login_required
-def add_user_game():
-    data = request.get_json()
-
-    game_id = data['game_id']
-    platform_id = data['platform_id']
-    user_id = current_user.get_id()
-
-    existing_user_game = UserGame.query.filter_by(
-        game_id=game_id, platform_id=platform_id, user_id=user_id).first()
-
-    if existing_user_game is None:
-        new_user_game = UserGame(
-            game_id=game_id, platform_id=platform_id, user_id=user_id)
-        db.session.add(new_user_game)
-
-        db.session.commit()
-
-        return jsonify({"success": True})
-    else:
-        return jsonify({"success": False})
-
-
-@auth.route('/remove_user_game', methods=['DELETE'])
-@login_required
-def remove_user_game():
-    data = request.get_json()
-    game_id = data['game_id']
-    platform_id = data['platform_id']
-    user_game = UserGame.query.filter_by(
-        user_id=current_user.id, game_id=game_id, platform_id=platform_id).first()
-    if user_game:
-        db.session.delete(user_game)
-        db.session.commit()
-        return jsonify({"success": True})
-    else:
-        return jsonify({"success": False, "error": "User game does not exist"})
-
-
-@auth.route('/get_user_games', methods=['GET'])
-@login_required
-def get_user_games():
-    user_games = UserGame.query.filter_by(user_id=current_user.id).all()
-    games = []
-    for user_game in user_games:
-        game = user_game.game
-        platform = user_game.platform
-        games.append({
-            'id': user_game.id,
-            'name': game.name,
-            'genre': game.genre,
-            'console': game.console,
-            'completed': user_game.completed,
-            'recommend': user_game.recommend,
-            'platform': platform.name,
-            'platform_id': platform.key
-        })
-    return jsonify(games)
-
-
-@auth.route('/delete_user_game/<int:user_game_id>', methods=['DELETE'])
-@login_required
-def delete_user_game(user_game_id):
-    user_game = UserGame.query.filter_by(
-        id=user_game_id, user_id=current_user.id).first()
-    if user_game:
-        db.session.delete(user_game)
-        db.session.commit()
-        return jsonify({"success": True})
-    else:
-        return jsonify({"success": False})
 
 
 @auth.route("/steam_login")

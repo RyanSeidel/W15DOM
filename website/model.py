@@ -54,7 +54,13 @@ class Game(db.Model):
     completed = db.Column(db.Boolean, default=False)
     recommend = db.Column(db.Boolean, default=False)
     external_id = db.Column(db.Integer, nullable=False)
+    
     platform = db.relationship('Platform', backref=db.backref('games', lazy=True))
+
+    def __repr__(self):
+        return f"Game('{self.name}', '{self.platform.name if self.platform else None}', '{self.console}', '{self.completed}', '{self.recommend}')"
+
+
 
 
 

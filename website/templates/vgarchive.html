@@ -28,7 +28,7 @@
     <h1>WI5DOM Game Archive</h1>
     </div>
     <div class="archive">
-    <form id="game-form" method="POST" action="{{ url_for('auth.vgarchive') }}">
+    <form id="game-form" method="POST" action="{{ url_for('views.archive') }}">
       <input type="hidden" id="game-id" value=""> <!-- Add this hidden input field -->
       <label for="name">Name:</label>
       <input type="text" id="name" name="name">
@@ -50,8 +50,8 @@
           <th>Genre</th>
           <th>Console</th>
           <th>Completed</th>
-          <th>Recommend</th>
-          <th>Actions</th>
+          <th>Recommended</th>
+          <th>Action</th>
         </tr>
       </thead>
       <tbody>
@@ -62,13 +62,13 @@
           <td>{{ game.console }}</td>
           <td>{{ 'Yes' if game.completed else 'No' }}</td>
           <td>{{ 'Yes' if game.recommend else 'No' }}</td>
-          <td>
-            <!-- You can add edit and delete functionality here later -->
-          </td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
+    
+    
+    
    
   </body>
 </html>

@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, session
+from flask import Blueprint, render_template, request, session, flash
 from flask_login import login_required, current_user
 from website.model import Game, UserGame, Platform, db
 from .forms import SearchForm
@@ -87,10 +87,27 @@ def settings():
     return render_template("settings.html")
 
 # Route for the archive page
-@views.route('/archive')
+@views.route('/archive', methods=['GET', 'POST'])
 @login_required
 def archive():
-    return render_template("vgarchive.html")
+    if request.method == 'POST':
+        name = request.form.get('name')
+        genre = request.form.get('genre')
+        console = request.form.get('console')
+        completed = 'completed' in request.form
+        recommend = 'recommend' in request.form
+
+        new_game = Game(user_id=current_user.get_id(), name=name, genre=genre,
+                        console=console, completed=completed, recommend=recommend)
+        db.session.add(new_game)
+        db.session.commit()
+
+        flash('Game added successfully', category='success')
+
+    games = Game.query.filter_by(user_id=current_user.get_id()).all()
+    return render_template("vgarchive.html", games=games)
+
+
 
 # Route for the help page
 @views.route('/help')
