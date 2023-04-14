@@ -28,20 +28,20 @@
     <h1>WI5DOM Game Archive</h1>
     </div>
     <div class="archive">
-    <form id="game-form" method="POST" action="{{ url_for('views.archive') }}">
-      <input type="hidden" id="game-id" value=""> <!-- Add this hidden input field -->
-      <label for="name">Name:</label>
-      <input type="text" id="name" name="name">
-      <label for="genre">Genre:</label>
-      <input type="text" id="genre" name="genre">
-      <label for="console">Console:</label>
-      <input type="text" id="console" name="console">
-      <label for="completed">Completed:</label>
-      <input type="checkbox" id="completed" name="completed">
-      <label for="recommend">Recommend:</label>
-      <input type="checkbox" id="recommend" name="recommend">
-      <button type="submit">Add Game</button>
-    </form>
+      <form id="game-form" method="POST" action="{{ url_for('views.archive') }}">
+        <input type="hidden" id="game-id" value="">
+        <label for="name-input">Name:</label>
+        <input type="text" id="name-input" name="name">
+        <label for="genre-input">Genre:</label>
+        <input type="text" id="genre-input" name="genre">
+        <label for="console-input">Console:</label>
+        <input type="text" id="console-input" name="console">
+        <label for="completed-input">Completed:</label>
+        <input type="checkbox" id="completed-input" name="completed">
+        <label for="recommend-input">Recommend:</label>
+        <input type="checkbox" id="recommend-input" name="recommend">
+        <button type="submit">Add Game</button>
+      </form>      
     </div>
     <table id="game-table">
       <thead>
@@ -62,10 +62,15 @@
           <td>{{ game.console }}</td>
           <td>{{ 'Yes' if game.completed else 'No' }}</td>
           <td>{{ 'Yes' if game.recommend else 'No' }}</td>
+          <td>
+            <button class="edit" data-id="{{ game.id }}">Edit</button>
+            <button class="delete" data-id="{{ game.id }}">Delete</button>
+          </td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
+    
     
     
     

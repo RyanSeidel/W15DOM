@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, session, flash
+from flask import Blueprint, render_template, request, session, flash, redirect, url_for, jsonify
 from flask_login import login_required, current_user
 from website.model import Game, UserGame, Platform, db
 from .forms import SearchForm
@@ -73,6 +73,70 @@ def home():
     # Render the home template with the appropriate data
     return render_template('home.html', form=form, username=current_user.name, games=games, search_string=search_string)
 
+@views.route('/get_games')
+def get_games():
+    # Fetch the games from the database
+    games = Game.query.all()
+
+    # Convert the games to a list of dictionaries
+    game_list = []
+    for game in games:
+        game_dict = {
+            'id': game.id,
+            'name': game.name,
+            'genre': game.genre,
+            'console': game.console,
+            'completed': game.completed,
+            'recommend': game.recommend,
+        }
+        game_list.append(game_dict)
+
+    # Return the games as JSON
+    return jsonify({'games': game_list})
+
+@views.route('/delete_game/<int:game_id>', methods=['DELETE'])
+@login_required
+def delete_game(game_id):
+    # Fetch the game from the database
+    game = Game.query.get_or_404(game_id)
+
+    # Delete user-game association rows
+    UserGame.query.filter_by(game_id=game_id).delete()
+
+    # Delete the game
+    db.session.delete(game)
+    db.session.commit()
+
+    # Return a JSON response indicating success
+    return jsonify({'success': True}), 200
+
+
+
+
+@views.route('/get_game/<int:game_id>', methods=['GET'])
+@login_required
+def get_game(game_id):
+    game = Game.query.get_or_404(game_id)
+    return jsonify({'game': game.to_dict()})
+
+
+@views.route('/update_game/<int:game_id>', methods=['POST'])
+@login_required
+def update_game(game_id):
+    # Fetch the game from the database
+    game = Game.query.get_or_404(game_id)
+
+    # Update the game with the new data
+    game.completed = 'completed' in request.form
+    game.recommend = 'recommend' in request.form
+
+    # Save the updated game to the database
+    db.session.commit()
+
+    # Redirect to the archive page
+    flash('Game updated successfully', category='success')
+    return redirect(url_for('views.archive'))
+
 
 # Route for the games page
 @views.route('/games')
@@ -106,6 +170,30 @@ def archive():
 
     games = Game.query.filter_by(user_id=current_user.get_id()).all()
     return render_template("vgarchive.html", games=games)
+
+@views.route('/add_game', methods=['POST'])
+@login_required
+def add_game():
+    data = request.get_json()
+    name = data.get('name')
+    genre = data.get('genre')
+    console = data.get('console')
+    completed = data.get('completed')
+    recommend = data.get('recommend')
+
+    # check if a game with the same name already exists
+    existing_game = Game.query.filter_by(name=name).first()
+    if existing_game:
+        # game with same name already exists
+        return jsonify({'success': False, 'error': 'Game with same name already exists'})
+
+    # create a new game and add to the database
+    new_game = Game(user_id=current_user.get_id(), name=name, genre=genre,
+                    console=console, completed=completed, recommend=recommend)
+    db.session.add(new_game)
+    db.session.commit()
+
+    return jsonify({'success': True})
 
 
 

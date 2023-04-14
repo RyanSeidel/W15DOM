@@ -59,6 +59,20 @@ class Game(db.Model):
 
     def __repr__(self):
         return f"Game('{self.name}', '{self.platform.name if self.platform else None}', '{self.console}', '{self.completed}', '{self.recommend}')"
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'platform': self.platform.name if self.platform else None,
+            'genre': self.genre,
+            'console': self.console,
+            'completed': self.completed,
+            'recommend': self.recommend,
+            'external_id': self.external_id
+        }
+    
+    
 
 
 

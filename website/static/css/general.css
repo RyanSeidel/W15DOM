@@ -218,3 +218,28 @@ body {
 {
   font-size: 2rem;
 }
+
+.dialog-box{
+  font-family: "Rubik", sans-serif;
+  margin: 2rem;
+
+}
+
+/* Dialog text */
+.dialog-text {
+  font-size: 1.5rem; /* Change the font size */
+  color: #444; /* Change the text color */
+  text-align: center;
+
+}
+
+/* Dialog buttons */
+.ui-dialog .ui-dialog-buttonpane {
+  display: flex;
+  justify-content: center;
+}
+
+.ui-dialog-buttonset {
+  display: inline-flex;
+  text-align: center;
+}
