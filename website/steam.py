@@ -35,7 +35,6 @@ def get_owned_games(platform_key):
                 continue
 
             playtime = game.get('playtime_forever', 0)
-            
 
             # check if game with same external_id already exists
             existing_game = Game.query.filter_by(external_id=game_id).first()
@@ -60,17 +59,23 @@ def get_owned_games(platform_key):
                 db.session.add(new_game)
                 db.session.flush()
 
-                # create new user_game
-                new_user_game = UserGame(platform_id=platform.id, game_id=new_game.id, playtime=playtime, owned=True, user_id=platform.user_id)
-                db.session.add(new_user_game)
+                # check for duplicate user_game
+                existing_user_game = user_game_dict.get(new_game.id)
+                if existing_user_game:
+                    # update existing user_game
+                    existing_user_game.playtime = playtime
+                else:
+                    # create new user_game
+                    new_user_game = UserGame(platform_id=platform.id, game_id=new_game.id, playtime=playtime, owned=True, user_id=platform.user_id)
+                    db.session.add(new_user_game)
 
         db.session.commit()
         flash(f"Successfully retrieved {len(games)} owned games for platform {platform.key}", 'success')
         print(f"Retrieved games: {len(games)}")
+
     except Exception as e:
         db.session.rollback()
         flash(f"Failed to retrieve owned games for platform {platform.key}: {str(e)}", 'danger')
-
 
 
 

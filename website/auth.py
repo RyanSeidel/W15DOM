@@ -4,6 +4,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from website.model import db, userinfo, Game, UserGame, Platform
 from website.steam import steam_api, api_key, get_owned_games
 import requests
+from sqlalchemy import exists, and_
 
 
 auth = Blueprint('auth', __name__)
@@ -148,16 +149,38 @@ def update_game(game_id):
         return jsonify({"success": False})
 
 
-@auth.route('/delete_game/<int:game_id>', methods=['DELETE'])
+@auth.route('/delete_game/<int:game_id>', methods=['POST'])
 @login_required
 def delete_game(game_id):
-    game = Game.query.filter_by(id=game_id, user_id=current_user.id).first()
+    # Get the current user from the database
+    user = current_user
+
+    # Find the game with the given id for the current user
+    game = Game.query.filter_by(user_id=user.id, id=game_id).first()
+
     if game:
+        # Delete the corresponding rows in the user_game table
+        user_game_subq = UserGame.query.filter(and_(
+            UserGame.game_id == game.id,
+            exists().where(and_(
+                UserGame.user_id == userinfo.id,
+                userinfo.steam_id == game.platform.steam_id
+            ))
+        ))
+        db.session.query(UserGame).filter(user_game_subq).delete(synchronize_session=False)
+
+        # Delete the game
         db.session.delete(game)
         db.session.commit()
-        return jsonify({"success": True})
+
+        flash(f"You have successfully deleted the game '{game.name}'.", category='success')
     else:
-        return jsonify({"success": False})
+        flash('The game you are trying to delete was not found or does not belong to you.', category='danger')
+
+    return redirect(url_for('views.library'))
+
+
+
 
 
 @auth.route('/get_games', methods=['GET'])
@@ -273,6 +296,7 @@ def authorized():
         # Create a new platform object and add it to the user's list of connected platforms
         platform = Platform(name='Steam', user_id=user.id,
                             connected=True, key=steam_id)
+        db.session.add(platform)
         user.platforms.append(platform)
     else:
         # Update the existing platform with the new values
@@ -282,18 +306,48 @@ def authorized():
         # Set a session variable to remember that the user has connected their Steam account
         session["steam_connected"] = existing_platform.connected
 
+    # Commit the changes to the database
     db.session.commit()
 
     # Call the function to retrieve user's owned games from Steam API
-    if existing_platform.connected:
+    if existing_platform and existing_platform.connected:
         get_owned_games(platform_key=existing_platform.key)
 
     return redirect(url_for("views.account"))
 
 
+
 @auth.route('/steam_disconnect', methods=['POST'])
 @login_required
 def steam_disconnect():
-    session.pop('steam_user', None)
-    flash('You have successfully disconnected your Steam account.', category='success')
+    # Get the current user from the database
+    user = current_user
+
+    # Get the platform to disconnect
+    platform = Platform.query.filter_by(user_id=user.id, name='Steam').first()
+
+    if platform:
+        # Delete all games associated with the platform
+        for game in platform.games:
+            UserGame.query.filter_by(game_id=game.id).delete()
+            db.session.delete(game)
+
+        # Delete the platform
+        db.session.delete(platform)
+        db.session.commit()
+
+        flash(f"You have successfully disconnected from the {platform.name} platform.", category='success')
+    else:
+        flash('You are not currently connected to the Steam platform.', category='danger')
+
     return redirect(url_for('views.account'))
+
+
+
+
+
+
+
+
+
+
