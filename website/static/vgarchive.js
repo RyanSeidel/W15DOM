@@ -39,11 +39,7 @@ $(document).ready(function () {
         console.log(xhr.responseText);
       }
     });
-  }
-  
-  
-  
-  
+  }  
     // Function to update the table with the current game collection
     function updateTable() {
       // Fetch games from the server
@@ -153,7 +149,7 @@ $(document).ready(function () {
           var game = response.game;
           console.log(game); // Add this line to inspect the game object
     
-          if (game.platform.toLowerCase() === "steam") {
+          if (game.platform && game.platform.toLowerCase() === "steam") {
             showDialogBox("You cannot delete a Steam game.", null);
           } else {
             showDialogBox("Are you sure you want to delete this game?", function(response) {
@@ -168,9 +164,7 @@ $(document).ready(function () {
         }
       });
     });
-    
-     
-      
+        
       // Function to handle the form submission for adding a new game
       $("#game-form").submit(function (event) {
         event.preventDefault();
@@ -206,17 +200,21 @@ $(document).ready(function () {
               $("#console-input").val("");
               $("#completed-input").prop("checked", false);
               $("#recommend-input").prop("checked", false);
-        
+          
               updateTable();
               alert("Game added successfully.");
             } else {
-              window.console.log("Error adding game");
+              window.console.log("Error adding game: " + response.error);
+              alert("Error adding game: " + response.error);
             }
           },
           error: function(xhr, status, error) {
-            window.console.log("Error adding game");
+            window.console.log("Error adding game: " + error);
+            alert("Error adding game: " + error);
           }
         });
+        
+        
         
         
         

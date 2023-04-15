@@ -47,7 +47,7 @@ class Game(db.Model):
     __tablename__ = 'game'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('userinfo.id'), nullable=False)
-    name = db.Column(db.String(100), nullable=False, unique=True)
+    name = db.Column(db.String(100), nullable=False, unique=False)
     platform_id = db.Column(db.Integer, db.ForeignKey('platform.id', ondelete='CASCADE'), nullable=False)
     genre = db.Column(db.String(100), nullable=False)
     console = db.Column(db.String(100), nullable=False)
@@ -72,11 +72,14 @@ class Game(db.Model):
             'external_id': self.external_id
         }
     
-    
+    @staticmethod
+    def add_game(user_id, name, platform_id, genre, console, completed, recommend, external_id):
+        existing_game = Game.query.filter_by(user_id=user_id, name=name).first()
+        if existing_game:
+            # game with same name already exists for this user
+            return False
 
-
-
-
-
-
-
+        new_game = Game(user_id=user_id, name=name, platform_id=platform_id, genre=genre,
+                        console=console, completed=completed, recommend=recommend, external_id=external_id)
+        db.session.add(new_game)
+       

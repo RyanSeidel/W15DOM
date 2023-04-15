@@ -13,7 +13,6 @@ views = Blueprint('views', __name__)
 def index():
     return render_template('index.html')
 
-# Route for the home page, handling both GET and POST requests
 @views.route('/home', methods=['GET', 'POST'])
 @login_required
 def home():
@@ -23,11 +22,11 @@ def home():
 
     # Querying for user's games ordered by playtime in descending order
     all_games = Game.query\
-    .join(UserGame, Game.id == UserGame.game_id)\
-    .filter(UserGame.user_id == current_user.id)\
-    .with_entities(Game, UserGame.playtime)\
-    .order_by(UserGame.playtime.desc().nullslast(), Game.name)\
-    .all()
+        .outerjoin(UserGame, Game.id == UserGame.game_id)\
+        .filter((UserGame.user_id == current_user.id) | (Game.user_id == current_user.id))\
+        .with_entities(Game, UserGame.playtime)\
+        .order_by(UserGame.playtime.desc().nullslast(), Game.name)\
+        .all()
 
     games = all_games
     search_string = ''  # Initialize the search_string variable
@@ -62,10 +61,12 @@ def home():
     # Render the home template with the appropriate data
     return render_template('home.html', form=form, username=current_user.name, games=games, search_string=search_string)
 
+
 @views.route('/get_games')
+@login_required
 def get_games():
-    # Fetch the games from the database
-    games = Game.query.all()
+    # Fetch the games belonging to the current user from the database
+    games = Game.query.filter_by(user_id=current_user.id).all()
 
     # Convert the games to a list of dictionaries
     game_list = []
@@ -82,6 +83,7 @@ def get_games():
 
     # Return the games as JSON
     return jsonify({'games': game_list})
+
 
 @views.route('/delete_game/<int:game_id>', methods=['DELETE'])
 @login_required
@@ -100,12 +102,17 @@ def delete_game(game_id):
     return jsonify({'success': True}), 200
 
 
-
-
 @views.route('/get_game/<int:game_id>', methods=['GET'])
 @login_required
 def get_game(game_id):
+    # Fetch the game from the database
     game = Game.query.get_or_404(game_id)
+
+    # Check if the game belongs to the current user
+    if game.user_id != current_user.id:
+        return jsonify({'error': 'You are not authorized to view this game.'}), 403
+
+    # Return the game as a JSON object
     return jsonify({'game': game.to_dict()})
 
 
@@ -114,6 +121,11 @@ def get_game(game_id):
 def update_game(game_id):
     # Fetch the game from the database
     game = Game.query.get_or_404(game_id)
+
+    # Check if the game belongs to the current user
+    if game.user_id != current_user.id:
+        flash('You do not have permission to update this game', category='error')
+        return redirect(url_for('views.archive'))
 
     # Update the game with the new data
     game.completed = 'completed' in request.form
@@ -157,7 +169,7 @@ def archive():
 
         flash('Game added successfully', category='success')
 
-    games = Game.query.filter_by(user_id=current_user.get_id()).all()
+    games = Game.query.filter_by(user_id=current_user.id).all()
     return render_template("vgarchive.html", games=games)
 
 @views.route('/add_game', methods=['POST'])
@@ -170,19 +182,30 @@ def add_game():
     completed = data.get('completed')
     recommend = data.get('recommend')
 
-    # check if a game with the same name already exists
-    existing_game = Game.query.filter_by(name=name).first()
+    # check if a game with the same name already exists for this user
+    existing_game = Game.query.filter_by(user_id=current_user.get_id(), name=name).first()
     if existing_game:
-        # game with same name already exists
-        return jsonify({'success': False, 'error': 'Game with same name already exists'})
+        # game with same name already exists for this user
+        return jsonify({'success': False, 'error': 'You have already added a game with this name'})
 
     # create a new game and add to the database
-    new_game = Game(user_id=current_user.get_id(), name=name, genre=genre,
-                    console=console, completed=completed, recommend=recommend)
+    platform_name = data.get('platform')
+    if platform_name:
+        platform = Platform.query.filter_by(user_id=current_user.get_id(), name=platform_name).first()
+        if not platform:
+            return jsonify({'success': False, 'error': 'Platform not found'})
+        new_game = Game(user_id=current_user.get_id(), name=name, genre=genre,
+                        console=console, completed=completed, recommend=recommend, platform=platform)
+    else:
+        new_game = Game(user_id=current_user.get_id(), name=name, genre=genre,
+                        console=console, completed=completed, recommend=recommend)
     db.session.add(new_game)
     db.session.commit()
 
     return jsonify({'success': True})
+
+
+
 
 # Route for the help page
 @views.route('/help')
