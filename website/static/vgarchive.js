@@ -153,7 +153,7 @@ $(document).ready(function () {
           var game = response.game;
           console.log(game); // Add this line to inspect the game object
     
-          if (game.pltoLowerCase() === "steam") {
+          if (game.platform.toLowerCase() === "steam") {
             showDialogBox("You cannot delete a Steam game.", null);
           } else {
             showDialogBox("Are you sure you want to delete this game?", function(response) {
