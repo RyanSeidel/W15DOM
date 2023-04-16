@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Home{% endblock %}
+{% block title %}Leaderboard{% endblock %}
 
 {% block content %}
   <header class="header ">
@@ -22,4 +22,26 @@
     </nav>
   </header>
 
+  <main class="leaderboard">
+    <h1 class="leaderboard-title">Top 5 Most Played Games</h1>
+
+    <table class="leaderboard-table">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Game</th>
+          <th>Playtime</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for game in top_games %}
+          <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ game.name }}</td>
+            <td>{{ game.total_playtime }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </main>
 {% endblock %}

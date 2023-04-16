@@ -117,17 +117,13 @@ def authorized():
         # Set a session variable to remember that the user has connected their Steam account
         session["steam_connected"] = existing_platform.connected
 
+    # Call the function to retrieve user's owned games from Steam API
+    get_owned_games(platform_key=steam_id)
+
     # Commit the changes to the database
     db.session.commit()
 
-    # Call the function to retrieve user's owned games from Steam API
-    if existing_platform and existing_platform.connected:
-        get_owned_games(platform_key=existing_platform.key)
-
     return redirect(url_for("views.account"))
-
-
-
 
 @auth.route('/steam_disconnect', methods=['POST'])
 @login_required
@@ -153,13 +149,3 @@ def steam_disconnect():
         flash('You are not currently connected to the Steam platform.', category='danger')
 
     return redirect(url_for('views.account'))
-
-
-
-
-
-
-
-
-
-

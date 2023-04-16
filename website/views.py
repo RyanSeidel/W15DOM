@@ -1,7 +1,8 @@
 from flask import Blueprint, render_template, request, session, flash, redirect, url_for, jsonify
 from flask_login import login_required, current_user
-from website.model import Game, UserGame, Platform, db
+from website.model import Game, UserGame, Platform, db, userinfo
 from .forms import SearchForm
+from sqlalchemy import func, desc
 from website.steam import steam_api, api_key, get_owned_games
 import difflib
 
@@ -205,31 +206,44 @@ def add_game():
     return jsonify({'success': True})
 
 
-
-
 # Route for the help page
 @views.route('/help')
 @login_required
 def help():
     return render_template('help.html')
 
-# Route for the message page
-@views.route('/message')
+# Route for the leaderboard page
+@views.route('/leaderboard')
 @login_required
-def message():
-    return render_template("message.html")
+def leaderboard():
+    # Query the database for the top 5 games played by all users
+    top_games = db.session.query(Game.name, func.sum(UserGame.playtime).label('total_playtime')) \
+        .join(UserGame, Game.id == UserGame.game_id) \
+        .group_by(Game.id) \
+        .order_by(desc('total_playtime')) \
+        .limit(5) \
+        .all()
+
+    # Render the leaderboard template with the top games data
+    return render_template('leaderboard.html', top_games=top_games)
+
 
 @views.route('/account')
 @login_required
 def account():
     user_platforms = current_user.platforms
     steam_connected = False
+    steam_fetched = session.get('steam_fetched', False)
 
     for platform in user_platforms:
         if platform.name == 'Steam' and platform.connected:
             steam_connected = True
-            get_owned_games(platform_key=platform.key)
+            if not steam_fetched:
+                get_owned_games(platform_key=platform.key)
+                session['steam_fetched'] = True
             break
 
     return render_template('account.html', steam_connected=steam_connected)
+
+
 

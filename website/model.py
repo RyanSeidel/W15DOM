@@ -1,5 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
+from sqlalchemy import func, desc
 
 db = SQLAlchemy()
 
@@ -42,6 +43,18 @@ class UserGame(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('userinfo.id'), nullable=False)
     
     game = db.relationship('Game', backref='user_games')
+    
+    @staticmethod
+    def top_5_games(user_id):
+        games = (db.session.query(Game.name, func.sum(UserGame.playtime).label('total_playtime'))
+                 .join(UserGame)
+                 .filter(UserGame.user_id == user_id)
+                 .group_by(Game.id)
+                 .order_by(desc('total_playtime'))
+                 .limit(5)
+                 .all())
+        return games
+
 
 class Game(db.Model):
     __tablename__ = 'game'
@@ -54,6 +67,7 @@ class Game(db.Model):
     completed = db.Column(db.Boolean, default=False)
     recommend = db.Column(db.Boolean, default=False)
     external_id = db.Column(db.Integer, nullable=False)
+    image_url = db.Column(db.String(255), nullable=True)
     
     platform = db.relationship('Platform', backref=db.backref('games', lazy=True))
 

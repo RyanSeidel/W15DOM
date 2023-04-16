@@ -43,6 +43,7 @@ def get_owned_games(platform_key):
                 # update attributes of existing game
                 existing_game.genre = game.get('genre', '')
                 existing_game.console = 'PC'
+                existing_game.image_url = f"https://steamcdn-a.akamaihd.net/steam/apps/{existing_game.external_id}/header.jpg"
 
                 # check for duplicate user_game
                 existing_user_game = user_game_dict.get(existing_game.id)
@@ -56,6 +57,7 @@ def get_owned_games(platform_key):
             else:
                 # create new game
                 new_game = Game(user_id=platform.user_id, name=name, platform_id=platform.id, genre=game.get('genre', ''), console='PC', completed=False, recommend=False, external_id=game_id)
+                new_game.image_url = f"https://steamcdn-a.akamaihd.net/steam/apps/{new_game.external_id}/header.jpg"
                 db.session.add(new_game)
                 db.session.flush()
 
@@ -76,6 +78,7 @@ def get_owned_games(platform_key):
     except Exception as e:
         db.session.rollback()
         flash(f"Failed to retrieve owned games for platform {platform.key}: {str(e)}", 'danger')
+
 
 
 
