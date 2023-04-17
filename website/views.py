@@ -1,10 +1,12 @@
-from flask import Blueprint, render_template, request, session, flash, redirect, url_for, jsonify
+from flask import Blueprint, render_template, request, session, flash, redirect, url_for, jsonify, abort
 from flask_login import login_required, current_user
-from website.model import Game, UserGame, Platform, db, userinfo
+from website.model import Game, UserGame, Platform, db, userinfo, RatingEnum
 from .forms import SearchForm
 from sqlalchemy import func, desc, case
+from sqlalchemy.orm import joinedload, contains_eager
 from website.steam import steam_api, api_key, get_owned_games
 import difflib
+import ast
 
 # Creating a Blueprint for views
 views = Blueprint('views', __name__)
@@ -78,7 +80,8 @@ def get_games():
             'genre': game.genre,
             'console': game.console,
             'completed': game.completed,
-            'recommend': game.recommend,
+            'rating': game.user_games[0].rating if hasattr(game, 'user_games') and game.user_games else RatingEnum.UNRATED,
+
         }
         game_list.append(game_dict)
 
@@ -116,40 +119,76 @@ def get_game(game_id):
     # Return the game as a JSON object
     return jsonify({'game': game.to_dict()})
 
-
 @views.route('/update_game/<int:game_id>', methods=['POST'])
 @login_required
 def update_game(game_id):
-    # Fetch the game from the database
-    game = Game.query.get_or_404(game_id)
-
-    # Check if the game belongs to the current user
-    if game.user_id != current_user.id:
-        flash('You do not have permission to update this game', category='error')
-        return redirect(url_for('views.archive'))
-
-    # Update the game with the new data for the current user's game
+    rating = request.form.get('rating')
     user_game = UserGame.query.filter_by(user_id=current_user.id, game_id=game_id).first()
-    if not user_game:
-        flash('You do not have this game in your collection', category='error')
-        return redirect(url_for('views.archive'))
-
-    user_game.completed = bool(int(request.form.get('completed', 0)))
-    user_game.recommend = bool(int(request.form.get('recommend', 0)))
-
-    # Save the updated user game to the database
-    try:
+    if user_game:
+        user_game.rating = rating
         db.session.commit()
-    except Exception as e:
-        flash('Failed to update game: ' + str(e), category='error')
-        return redirect(url_for('views.archive'))
+        return jsonify({'success': True, 'rating': rating}), 200  # Return JSON response
+    else:
+        return jsonify({'success': False, 'error': 'You have not played this game'}), 400
 
-    # Redirect to the archive page
-    flash('Game updated successfully', category='success')
-    return redirect(url_for('views.archive'))
+@views.route('/update_game_completed/<int:game_id>', methods=['POST'])
+@login_required
+def update_game_completed(game_id):
+    game = Game.query.get_or_404(game_id)
+    completed = request.form.get('completed')
+
+    game.completed = ast.literal_eval(completed)
+
+    db.session.commit()
+    return jsonify({'success': True, 'completed': game.completed}), 200  # Return JSON response
+
+# Route for the archive page
+@views.route('/archive', methods=['GET', 'POST'])
+@login_required
+def archive():
+    if request.method == 'POST':
+        name = request.form.get('name')
+        genre = request.form.get('genre')
+        console = request.form.get('console')
+        completed = 'completed' in request.form
+
+        # Create a new Game object with the game data
+        new_game = Game(name=name, genre=genre, console=console, completed=completed)
+        db.session.add(new_game)
+        db.session.flush()  # Flush the session to get the new_game.id
+
+        # Get the user's rating for the game
+        rating_input = request.form.get('rating')
+        rating = None
+        if rating_input:
+            rating = RatingEnum[rating_input.upper()]
+
+        # Create a new UserGame object with the user's game data and the Game object as a relationship
+        new_user_game = UserGame(user_id=current_user.get_id(), game_id=new_game.id, rating=rating)
+        db.session.add(new_user_game)
+        db.session.commit()
+
+        flash('Game added successfully', category='success')
+
+    games = Game.query.outerjoin(UserGame, Game.id == UserGame.game_id).filter(Game.user_id == current_user.id).all()
+
+    # Update game completion status and rating
+    for game in games:
+        completed = request.form.get(f'{game.id}-completed')
+        rating_input = request.form.get(f'{game.id}-rating')
+        if completed is not None:
+            game.completed = (completed == 'true')
+        if rating_input is not None:
+            rating = RatingEnum[rating_input.upper()]
+            if game.user_games:
+                game.user_games[0].rating = rating
+            else:
+                new_user_game = UserGame(user_id=current_user.get_id(), game_id=game.id, rating=rating)
+                db.session.add(new_user_game)
+    db.session.commit()
 
 
-
+    return render_template("vgarchive.html", games=games)
 
 # Route for the games page
 @views.route('/games')
@@ -163,55 +202,43 @@ def games():
 def settings():
     return render_template("settings.html")
 
-# Route for the archive page
-@views.route('/archive', methods=['GET', 'POST'])
-@login_required
-def archive():
-    if request.method == 'POST':
-        name = request.form.get('name')
-        genre = request.form.get('genre')
-        console = request.form.get('console')
-        completed = 'completed' in request.form
-        recommend = 'recommend' in request.form
-
-        new_game = Game(user_id=current_user.get_id(), name=name, genre=genre,
-                        console=console, completed=completed, recommend=recommend)
-        db.session.add(new_game)
-        db.session.commit()
-
-        flash('Game added successfully', category='success')
-
-    games = Game.query.filter_by(user_id=current_user.id).all()
-    return render_template("vgarchive.html", games=games)
-
 @views.route('/add_game', methods=['POST'])
 @login_required
 def add_game():
-    data = request.get_json()
+    data = request.json
     name = data.get('name')
     genre = data.get('genre')
     console = data.get('console')
     completed = data.get('completed')
-    recommend = data.get('recommend')
-
+    rating = data.get('rating')
+    
     # check if a game with the same name already exists for this user
     existing_game = Game.query.filter_by(user_id=current_user.get_id(), name=name).first()
     if existing_game:
         # game with same name already exists for this user
         return jsonify({'success': False, 'error': 'You have already added a game with this name'})
-
-    # create a new game and add to the database
+    
+    # get the platform for the game
     platform_name = data.get('platform')
     if platform_name:
         platform = Platform.query.filter_by(user_id=current_user.get_id(), name=platform_name).first()
         if not platform:
             return jsonify({'success': False, 'error': 'Platform not found'})
-        new_game = Game(user_id=current_user.get_id(), name=name, genre=genre,
-                        console=console, completed=completed, recommend=recommend, platform=platform)
+        platform_id = platform.id
     else:
-        new_game = Game(user_id=current_user.get_id(), name=name, genre=genre,
-                        console=console, completed=completed, recommend=recommend)
+        platform_id = None
+    
+    # create a new game and add to the database
+    new_game = Game(user_id=current_user.get_id(), name=name, genre=genre,
+                    console=console, completed=completed, platform_id=platform_id, external_id=data.get('external_id'),
+                    image_url=data.get('image_url'))
+    
+    # add the rating to the UserGame table
+    new_user_game = UserGame(user_id=current_user.get_id(), game_id=new_game.id, rating=rating)
+
+ 
     db.session.add(new_game)
+    db.session.add(new_user_game)
     db.session.commit()
 
     return jsonify({'success': True})
@@ -227,32 +254,8 @@ def help():
 @views.route('/leaderboard')
 @login_required
 def leaderboard():
-    games = (db.session.query(Game.name.label('game_name'),
-                          Game.image_url.label('game_image_url'),
-                          func.sum(UserGame.playtime).label('total_playtime'),
-                          func.count(case((LikeDislike.recommend == True, 1), else_=None)).label('total_likes'),
-                          func.count(case((LikeDislike.recommend == False, 1), else_=None)).label('total_dislikes'))
-         .join(UserGame)
-         .outerjoin(LikeDislike)
-         .group_by(Game.id)
-         .order_by(desc('total_playtime'))
-         .limit(5)
-         .all())
-
+    games = UserGame.top_5_games(current_user.id)
     return render_template('leaderboard.html', games=games, current_user=current_user)
-
-class LikeDislike(db.Model):
-    __tablename__ = 'like_dislike'
-
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('userinfo.id'), nullable=False)
-    game_id = db.Column(db.Integer, db.ForeignKey('game.id', ondelete='CASCADE'), nullable=False)
-    recommend = db.Column(db.Boolean, nullable=False)
-
-    __table_args__ = (
-        db.UniqueConstraint('user_id', 'game_id', name='unique_user_game_like_dislike'),
-    )
-
 
 @views.route('/account')
 @login_required

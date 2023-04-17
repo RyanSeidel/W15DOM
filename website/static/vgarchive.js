@@ -1,45 +1,40 @@
 $(document).ready(function () {
   // Function to update a game record on the server
-  function updateGame(game_id, name, genre, console, completed, recommend) {
-    $.ajax({
-      url: "/update_game/" + game_id,
-      type: "POST",
-      data: {
-        name: name,
-        genre: genre,
-        console: console,
-        completed: completed ? 1 : 0, // Convert boolean to integer
-        recommend: recommend ? 1 : 0, // Convert boolean to integer
-      },
-      success: function (response) {
-        if (response.success) {
-          var completedCell = $(
-            "#game-table tr[data-id='" + game_id + "'] td:nth-child(5)"
-          );
-          var recommendCell = $(
-            "#game-table tr[data-id='" + game_id + "'] td:nth-child(6)"
-          );
-          completedCell.text(completed ? "Yes" : "No");
-          recommendCell.text(recommend ? "Yes" : "No");
+  // Function to update a game record on the server
+function updateGame(game_id, completed_response, rating_response) {
+  var completed = (typeof completed_response === "string" && completed_response.toLowerCase() === "yes") ? true : false;
+  var rating = (rating_response.toLowerCase() === "like") ? "like" : (rating_response.toLowerCase() === "dislike") ? "dislike" : "unrated";
 
-          var editButton = $(
-            "#game-table tr[data-id='" + game_id + "'] button.edit"
-          );
-          editButton.attr("data-completed", completed);
-          editButton.attr("data-recommend", recommend);
-        } else {
-          window.console.log("Error updating game");
-        }
-      },
-      error: function (xhr, status, error) {
-        console.log(error);
-      },
-      complete: function () {
-        updateTable();
-      },
-    });
-  }
+  $.ajax({
+    url: "/update_game/" + game_id,
+    type: "POST",
+    data: { rating: rating },
+    success: function (response) {
+      // Update the rating in the table
+      if (response.success) {
+        var newRating = (rating === "like") ? "Like" : (rating === "dislike") ? "Dislike" : "Unrated";
+        var row = $("button[data-id='" + game_id + "']").closest("tr");
+        row.find(".rating").text(newRating);
+      }
+    },
+  });
+  // Update the game's completed status in the database
+  $.ajax({
+    url: "/update_game_completed/" + game_id,
+    type: "POST",
+    data: { completed: completed },
+    success: function (response) {
+      // Update the completed status in the table
+      if (response.success) {
+        var row = $("button[data-id='" + game_id + "']").closest("tr");
+        row.find(".completed").text(completed ? "Yes" : "No");
+      }
+    },
+  });
+}
 
+
+  
   // Function to update the table with the current game collection
   function updateTable() {
     // Fetch games from the server
@@ -48,10 +43,10 @@ $(document).ready(function () {
       type: "GET",
       success: function (response) {
         var gameCollection = response.games;
-
+  
         // Create an empty table
         var table = $("<table>").attr("id", "game-table");
-
+  
         // Create the table header
         var header = $("<thead>").appendTo(table);
         var headerRow = $("<tr>").appendTo(header);
@@ -60,8 +55,9 @@ $(document).ready(function () {
         $("<th>").text("Console").appendTo(headerRow);
         $("<th>").text("Completed").appendTo(headerRow);
         $("<th>").text("Recommended").appendTo(headerRow);
+        $("<th>").text("Rating").appendTo(headerRow);
         $("<th>").text("Action").appendTo(headerRow);
-
+  
         // Create the table body
         var body = $("<tbody>").appendTo(table);
         for (var i = 0; i < gameCollection.length; i++) {
@@ -71,22 +67,22 @@ $(document).ready(function () {
           $("<td>").text(game.genre).appendTo(row);
           $("<td>").text(game.console).appendTo(row);
           $("<td>")
+          .addClass("completed")
             .text(game.completed ? "Yes" : "No")
             .appendTo(row);
           $("<td>")
-            .text(game.recommend ? "Yes" : "No")
+            .addClass("rating") //Add the "rating" class here
+            .text(game.rating)
             .appendTo(row);
-
+  
           // Create the Edit and Delete buttons
           var buttonGroup = $("<td>").appendTo(row);
           $("<button>")
-            .addClass("edit")
-            .attr("data-id", game.id)
-            .attr("data-completed", game.completed)
-            .attr("data-recommend", game.recommend)
-            .text("Edit")
-            .appendTo(buttonGroup);
-
+          .addClass("edit")
+          .attr("data-id", game.id)
+          .text("Edit")
+          .appendTo(buttonGroup);
+  
           $("<button>")
             .addClass("delete")
             .attr("data-id", game.id)
@@ -94,54 +90,69 @@ $(document).ready(function () {
             .text("Delete")
             .appendTo(buttonGroup);
         }
-
+  
         // Replace the old table with the new one
         $("#game-table").replaceWith(table);
       },
     });
   }
-
+  
   function showDialogBox(message, callback, title) {
-    title = callback ? "Confirm" : "Error";
+    title = title ? title : (callback ? "Confirm" : "Error");
     var box = $("<div>").attr("title", title).addClass("dialog-box");
     $("<p>").text(message).appendTo(box).addClass("dialog-text");
-    box.dialog({
-      modal: true,
-      buttons: callback
-        ? {
-            Yes: function () {
-              $(this).dialog("close");
-              callback("yes");
+    if (callback) {
+        box.dialog({
+            modal: true,
+            buttons: {
+                Yes: function () {
+                    $(this).dialog("close");
+                    callback("yes");
+                },
+                No: function () {
+                    $(this).dialog("close");
+                    callback("no");
+                },
+                Cancel: function () {
+                    $(this).dialog("close");
+                    callback("cancel");
+                },
             },
-            No: function () {
-              $(this).dialog("close");
-              callback("no");
-            },
-          }
-        : {
-            OK: function () {
-              $(this).dialog("close");
-            },
-          },
-    });
-  }
-
-  $(document).on("click", ".edit", function () {
-    var game_id = $(this).attr("data-id");
-    var completed = $(this).attr("data-completed");
-    var recommend = $(this).attr("data-recommend");
-
-    showDialogBox("Is the game completed?", function (response1) {
-      if (response1 === "yes" || response1 === "no") {
-        showDialogBox("Would you recommend this game?", function (response2) {
-          if (response2 === "yes" || response2 === "no") {
-            updateGame(game_id, response1 === "yes", response2 === "yes");
-          }
         });
-      }
-    });
-  });
+    } else {
+        box.dialog({
+            modal: true,
+            buttons: {
+                OK: function () {
+                    $(this).dialog("close");
+                },
+            },
+        });
+    }
+}
 
+
+$(document).on("click", ".edit", function () {
+  var game_id = $(this).attr("data-id");
+  var rating = $(this).closest("tr").find(".rating").text().trim();
+  var completed = $(this).closest("tr").find(".completed").text().trim() === "Yes";
+
+  var completed_msg = completed ? "Is the game still completed? (Yes/No)" : "Have you completed the game? (Yes/No)";
+  var rating_msg = "Did you like this game? (Like/Dislike/Unrated)";
+
+  showDialogBox(completed_msg, function (response1) {
+    if (response1 === "yes" || response1 === "no") {
+      var completed_response = response1;
+      showDialogBox(rating_msg, function (response2) {
+        if (response2 === "like" || response2 === "dislike" || response2 === "unrated") {
+          updateGame(game_id, completed_response, response2);
+        }
+      });
+    }
+  });   
+});
+
+  
   $(document).on("click", ".delete", function () {
     var game_id = $(this).attr("data-id");
 
@@ -174,15 +185,15 @@ $(document).ready(function () {
   // Function to handle the form submission for adding a new game
   $("#game-form").submit(function (event) {
     event.preventDefault();
-
+  
     var name = $("#name-input").val();
     var genre = $("#genre-input").val();
-    var console = $("#console-input").val();
+    var gameConsole = $("#console-input").val(); // Rename the variable
     var completed = $("#completed-input").is(":checked");
-    var recommend = $("#recommend-input").is(":checked");
-
+    var rating = $("#rating-input").val(); // Use rating instead of recommend
+  
     // Ensure that all required fields are filled out
-    if (name === "" || genre === "" || console === "") {
+    if (name === "" || genre === "" || gameConsole === "") {
       alert("Please fill out all required fields.");
       return;
     }
@@ -192,11 +203,11 @@ $(document).ready(function () {
       type: "POST",
       contentType: "application/json",
       data: JSON.stringify({
-        name: $("#name-input").val(),
+        name: name,
         genre: genre,
-        console: console,
+        console: gameConsole,
         completed: completed,
-        recommend: recommend,
+        rating: rating
       }),
       success: function (response) {
         if (response.success) {
@@ -205,19 +216,27 @@ $(document).ready(function () {
           $("#genre-input").val("");
           $("#console-input").val("");
           $("#completed-input").prop("checked", false);
-          $("#recommend-input").prop("checked", false);
-
+    
           updateTable();
           alert("Game added successfully.");
         } else {
-          window.console.log("Error adding game: " + response.error);
+          console.log("Error adding game: " + response.error);
           alert("Error adding game: " + response.error);
         }
       },
       error: function (xhr, status, error) {
-        window.console.log("Error adding game: " + error);
+        console.log("Error adding game: " + error);
         alert("Error adding game: " + error);
       },
     });
+    
+    
   });
 });
+
+
+
+
+
+
+
