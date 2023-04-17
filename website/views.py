@@ -79,10 +79,16 @@ def get_games():
             'name': game.name,
             'genre': game.genre,
             'console': game.console,
-            'completed': game.completed,
-            'rating': game.user_games[0].rating if hasattr(game, 'user_games') and game.user_games else RatingEnum.UNRATED,
-
+            'completed': game.completed
         }
+        if hasattr(game, 'user_games') and game.user_games:
+            game_dict['user_game'] = {
+                'rating': game.user_games[0].rating,
+            }
+        else:
+            game_dict['user_game'] = {
+                'rating': RatingEnum.UNRATED,
+            }
         game_list.append(game_dict)
 
     # Return the games as JSON
@@ -127,20 +133,31 @@ def update_game(game_id):
     if user_game:
         user_game.rating = rating
         db.session.commit()
-        return jsonify({'success': True, 'rating': rating}), 200  # Return JSON response
+        return jsonify({'success': True, 'rating': user_game.rating}), 200  # Return JSON response with updated rating
     else:
         return jsonify({'success': False, 'error': 'You have not played this game'}), 400
 
-@views.route('/update_game_completed/<int:game_id>', methods=['POST'])
+@views.route('/update_game_completed', methods=['POST'])
 @login_required
-def update_game_completed(game_id):
-    game = Game.query.get_or_404(game_id)
+def update_game_completed():
+    # Get the data from the request
+    name = request.form.get('name')
     completed = request.form.get('completed')
+    
+    # Look up the game by name for the current user
+    game = Game.query.filter_by(user_id=current_user.id, name=name).first()
 
-    game.completed = ast.literal_eval(completed)
-
+    # If the game doesn't exist, return an error
+    if game is None:
+        return jsonify({'success': False, 'error': 'Game not found.'}), 404
+    
+    # Update the game's completion status and commit the changes
+    game.completed = (completed == 'true')
     db.session.commit()
-    return jsonify({'success': True, 'completed': game.completed}), 200  # Return JSON response
+
+    # Return a success response
+    return jsonify({'success': True})
+
 
 # Route for the archive page
 @views.route('/archive', methods=['GET', 'POST'])
@@ -254,8 +271,20 @@ def help():
 @views.route('/leaderboard')
 @login_required
 def leaderboard():
-    games = UserGame.top_5_games(current_user.id)
+    games = (db.session.query(Game.name, Game.image_url, func.sum(UserGame.playtime).label('total_playtime'), 
+                 func.count(case((UserGame.rating == 'like', 1), else_=None)).label('total_likes'),
+                 func.count(case((UserGame.rating == 'dislike', 1), else_=None)).label('total_dislikes'))
+                 .join(UserGame)
+                 .filter(UserGame.user_id == current_user.id)
+                 .filter(UserGame.playtime != None)  # filter out games where playtime is undefined
+                 .group_by(Game.id)
+                 .order_by(desc('total_playtime'))
+                 .limit(5)
+                 .all())
+
     return render_template('leaderboard.html', games=games, current_user=current_user)
+
+
 
 @views.route('/account')
 @login_required

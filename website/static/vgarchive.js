@@ -1,47 +1,80 @@
 $(document).ready(function () {
   // Function to update a game record on the server
   function updateGame(game_id, completed_response, rating_response) {
-    console.log("Updating game with ID:", game_id); // Add this line
-  
-    var completed = (typeof completed_response === "string" && completed_response.toLowerCase() === "yes") ? true : false;
-    var rating = (rating_response.toLowerCase() === "like") ? "like" : (rating_response.toLowerCase() === "dislike") ? "dislike" : "unrated";
-  
+    // Fetch the game from the server
     $.ajax({
-      url: "/update_game/" + game_id,
-      type: "POST",
-      data: { rating: rating },
-      success: function (response) {
-        console.log("Rating update response:", response); // Add this line
+      url: "/get_game/" + game_id,
+      type: "GET",
+      success: function(response) {
+        var game = response.game;
+        
+        // Update the game's completed status in the database
+        if (completed_response !== undefined) {
+          // Update the value of game.completed
+          game.completed = completed_response;
+      
+          $.ajax({
+              url: "/update_game_completed",
+              type: "POST",
+              data: {
+                  name: game.name,
+                  completed: game.completed ? "true" : "false"
+              },
+              success: function (response) {
+                  console.log("Completed status update response:", response);
+      
+                  // Update the completed status in the table
+                  if (response.success) {
+                      var row = $("button[data-id='" + game_id + "']").closest("tr");
+                      row.find(".completed").text(completed_response ? "Yes" : "No");
+                  } else {
+                      console.log("Error updating completed status:", response.error);
+                      alert("Error updating completed status: " + response.error);
+                  }
+              },
+              error: function(xhr, status, error) {
+                  console.log("Error updating completed status:", error);
+                  alert("Error updating completed status: " + error);
+              }
+          });
+      }
+      
+        
+        // Update the game's rating in the database
+        if (rating_response !== undefined) {
+          var rating = (rating_response.toLowerCase() === "yes") ? "like" : (rating_response.toLowerCase() === "no") ? "dislike" : "unrated";
+          $.ajax({
+            url: "/update_game/" + game_id,
+            type: "POST",
+            data: { rating: rating },
+            success: function (response) {
+              console.log("Rating update response:", response);
   
-        // Update the rating in the table
-        if (response.success) {
-          var newRating = (rating === "like") ? "Like" : (rating === "dislike") ? "Dislike" : "Unrated";
-          var row = $("button[data-id='" + game_id + "']").closest("tr");
-          row.find(".rating").text(newRating);
+              // Update the rating in the table
+              if (response.success) {
+                var newRating = (rating === "like") ? "Like" : (rating === "dislike") ? "Dislike" : "Unrated";
+                var row = $("button[data-id='" + game_id + "']").closest("tr");
+                row.find(".rating").text(newRating);
+              } else {
+                console.log("Error updating rating:", response.error);
+                alert("Error updating rating: " + response.error);
+              }
+            },
+            error: function(xhr, status, error) {
+              console.log("Error updating rating:", error);
+              alert("Error updating rating: " + error);
+            }
+          });
         }
       },
-    });
-  
-    // Update the game's completed status in the database
-    $.ajax({
-      url: "/update_game_completed/" + game_id,
-      type: "POST",
-      data: { completed: completed },
-      success: function (response) {
-        console.log("Completed status update response:", response); // Add this line
-  
-        // Update the completed status in the table
-        if (response.success) {
-          var row = $("button[data-id='" + game_id + "']").closest("tr");
-          row.find(".completed").text(completed ? "Yes" : "No");
-        }
-      },
+      error: function(xhr, status, error) {
+        console.log("Error fetching game:", error);
+        alert("Error fetching game: " + error);
+      }
     });
   }
   
 
-
-  
   // Function to update the table with the current game collection
   function updateTable() {
     // Fetch games from the server
@@ -61,7 +94,6 @@ $(document).ready(function () {
         $("<th>").text("Genre").appendTo(headerRow);
         $("<th>").text("Console").appendTo(headerRow);
         $("<th>").text("Completed").appendTo(headerRow);
-        $("<th>").text("Recommended").appendTo(headerRow);
         $("<th>").text("Rating").appendTo(headerRow);
         $("<th>").text("Action").appendTo(headerRow);
   
@@ -144,26 +176,32 @@ $(document).on("click", ".edit", function () {
 
   var game_id = $(this).attr("data-id");
   var rating = $(this).closest("tr").find(".rating").text().trim();
-  var completed = $(this).closest("tr").find(".completed").text().trim() === "Yes";
+  var completed = ($(this).closest("tr").find(".completed").text().trim().toLowerCase() === "yes");
 
-  var completed_msg = completed ? "Is the game still completed? (Yes/No)" : "Have you completed the game? (Yes/No)";
-  var rating_msg = "Did you like this game? (Like/Dislike/Unrated)";
+  var completed_msg = "Have you completed the game? (Yes/No)";
+  var rating_msg = "Do you like this game? (Yes/No)";
 
   showDialogBox(completed_msg, function (response1) {
     console.log("response1:", response1);
 
-    if (response1 === "yes" || response1 === "no") {
-      console.log("answer to first as been done");
-      var completed_response = (response1.toLowerCase() === "yes") ? true : false; // Modify this line
-      showDialogBox(rating_msg, function (response2) {
-        if (response2 === "like" || response2 === "dislike" || response2 === "unrated") {
-          updateGame(game_id, completed_response, response2);
-          updateTable();
-        }
-      });     
-    }
-  });   
+    var completed_response = response1.toLowerCase() === "yes";
+
+    showDialogBox(rating_msg, function (response2) {
+      console.log("response2:", response2);
+
+      var rating_response = response2.toLowerCase() === "yes";
+
+      updateGame(game_id, completed_response, rating_response);
+      updateTable();
+    });
+  });
 });
+
+
+
+
+
+
 
 
 
