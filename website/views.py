@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, session, flash, redirect,
 from flask_login import login_required, current_user
 from website.model import Game, UserGame, Platform, db, userinfo
 from .forms import SearchForm
-from sqlalchemy import func, desc
+from sqlalchemy import func, desc, case
 from website.steam import steam_api, api_key, get_owned_games
 import difflib
 
@@ -128,16 +128,27 @@ def update_game(game_id):
         flash('You do not have permission to update this game', category='error')
         return redirect(url_for('views.archive'))
 
-    # Update the game with the new data
-    game.completed = 'completed' in request.form
-    game.recommend = 'recommend' in request.form
+    # Update the game with the new data for the current user's game
+    user_game = UserGame.query.filter_by(user_id=current_user.id, game_id=game_id).first()
+    if not user_game:
+        flash('You do not have this game in your collection', category='error')
+        return redirect(url_for('views.archive'))
 
-    # Save the updated game to the database
-    db.session.commit()
+    user_game.completed = bool(int(request.form.get('completed', 0)))
+    user_game.recommend = bool(int(request.form.get('recommend', 0)))
+
+    # Save the updated user game to the database
+    try:
+        db.session.commit()
+    except Exception as e:
+        flash('Failed to update game: ' + str(e), category='error')
+        return redirect(url_for('views.archive'))
 
     # Redirect to the archive page
     flash('Game updated successfully', category='success')
     return redirect(url_for('views.archive'))
+
+
 
 
 # Route for the games page
@@ -216,16 +227,31 @@ def help():
 @views.route('/leaderboard')
 @login_required
 def leaderboard():
-    # Query the database for the top 5 games played by all users
-    top_games = db.session.query(Game.name, func.sum(UserGame.playtime).label('total_playtime')) \
-        .join(UserGame, Game.id == UserGame.game_id) \
-        .group_by(Game.id) \
-        .order_by(desc('total_playtime')) \
-        .limit(5) \
-        .all()
+    games = (db.session.query(Game.name.label('game_name'),
+                          Game.image_url.label('game_image_url'),
+                          func.sum(UserGame.playtime).label('total_playtime'),
+                          func.count(case((LikeDislike.recommend == True, 1), else_=None)).label('total_likes'),
+                          func.count(case((LikeDislike.recommend == False, 1), else_=None)).label('total_dislikes'))
+         .join(UserGame)
+         .outerjoin(LikeDislike)
+         .group_by(Game.id)
+         .order_by(desc('total_playtime'))
+         .limit(5)
+         .all())
 
-    # Render the leaderboard template with the top games data
-    return render_template('leaderboard.html', top_games=top_games)
+    return render_template('leaderboard.html', games=games, current_user=current_user)
+
+class LikeDislike(db.Model):
+    __tablename__ = 'like_dislike'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('userinfo.id'), nullable=False)
+    game_id = db.Column(db.Integer, db.ForeignKey('game.id', ondelete='CASCADE'), nullable=False)
+    recommend = db.Column(db.Boolean, nullable=False)
+
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'game_id', name='unique_user_game_like_dislike'),
+    )
 
 
 @views.route('/account')

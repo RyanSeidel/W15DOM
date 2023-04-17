@@ -1,47 +1,62 @@
-{% extends 'base.html' %}
+{% extends 'base.html' %} {% block title %}Leaderboard{% endblock %} {% block
+content %}
+<header class="header">
+  <div class="logo-container">
+    <a href="#">
+      <img
+        class="logo"
+        alt="W15DOM logo"
+        src="{{ url_for('static', filename='images/w15domlogo.png') }}"
+      />
+    </a>
+  </div>
 
-{% block title %}Leaderboard{% endblock %}
+  <nav class="home-nav">
+    <ul class="home-nav-list">
+      <li><a class="home-nav-link" href="/home">Your Games</a></li>
+      <li><a class="home-nav-link" href="/archive">Archive</a></li>
+      <li><a class="home-nav-link text-line" href="#">Leaderboard</a></li>
+      <li><a class="home-nav-link" href="/account">My Account</a></li>
+      <li><a class="home-nav-link" href="/help">Help</a></li>
+      <li><a class="home-nav-link" href="/logout">Logout</a></li>
+    </ul>
+  </nav>
+</header>
 
-{% block content %}
-  <header class="header ">
-    <div class="logo-container">
-      <a href="#">
-        <img class="logo" alt="W15DOM logo" src="{{ url_for('static', filename='images/w15domlogo.png') }}" />
-      </a>
-    </div>
+<main class="leaderboard">
+  <h1 class="leaderboard-title">Top 5 Most Played Games</h1>
 
-    <nav class="home-nav">
-      <ul class="home-nav-list">
-        <li><a class="home-nav-link" href="/home">Your Games</a></li>
-        <li><a class="home-nav-link" href="/archive">Archive</a></li>
-        <li><a class="home-nav-link text-line" href="#">Leaderboard</a></li>
-        <li><a class="home-nav-link" href="/account">My Account</a></li>
-        <li><a class="home-nav-link" href="/help">Help</a></li>
-        <li><a class="home-nav-link" href="/logout">Logout</a></li>
-      </ul>
-    </nav>
-  </header>
+  <table class="leaderboard-table">
+    <thead>
+      <tr>
+        <th>Rank</th>
+        <th>Game</th>
+        <th>Playtime</th>
+        <th>Total Likes</th>
+        <th>Total Dislikes</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for game in games %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td class="game-info">
+          <div class="game-image-container">
+            <img
+              src="{{ game.game_image_url }}"
+              alt="{{ game.game_name }} image"
+              class="game-image"
+            />
+          </div>
+          <div class="game-name">{{ game.game_name }}</div>
+        </td>
+        <td>{{ game.total_playtime }}</td>
+        <td>{{ game.total_likes }}</td>
+        <td>{{ game.total_dislikes }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</main>
 
-  <main class="leaderboard">
-    <h1 class="leaderboard-title">Top 5 Most Played Games</h1>
-
-    <table class="leaderboard-table">
-      <thead>
-        <tr>
-          <th>Rank</th>
-          <th>Game</th>
-          <th>Playtime</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for game in top_games %}
-          <tr>
-            <td>{{ loop.index }}</td>
-            <td>{{ game.name }}</td>
-            <td>{{ game.total_playtime }}</td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </main>
 {% endblock %}
