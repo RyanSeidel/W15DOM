@@ -1,37 +1,44 @@
 $(document).ready(function () {
   // Function to update a game record on the server
-  // Function to update a game record on the server
-function updateGame(game_id, completed_response, rating_response) {
-  var completed = (typeof completed_response === "string" && completed_response.toLowerCase() === "yes") ? true : false;
-  var rating = (rating_response.toLowerCase() === "like") ? "like" : (rating_response.toLowerCase() === "dislike") ? "dislike" : "unrated";
-
-  $.ajax({
-    url: "/update_game/" + game_id,
-    type: "POST",
-    data: { rating: rating },
-    success: function (response) {
-      // Update the rating in the table
-      if (response.success) {
-        var newRating = (rating === "like") ? "Like" : (rating === "dislike") ? "Dislike" : "Unrated";
-        var row = $("button[data-id='" + game_id + "']").closest("tr");
-        row.find(".rating").text(newRating);
-      }
-    },
-  });
-  // Update the game's completed status in the database
-  $.ajax({
-    url: "/update_game_completed/" + game_id,
-    type: "POST",
-    data: { completed: completed },
-    success: function (response) {
-      // Update the completed status in the table
-      if (response.success) {
-        var row = $("button[data-id='" + game_id + "']").closest("tr");
-        row.find(".completed").text(completed ? "Yes" : "No");
-      }
-    },
-  });
-}
+  function updateGame(game_id, completed_response, rating_response) {
+    console.log("Updating game with ID:", game_id); // Add this line
+  
+    var completed = (typeof completed_response === "string" && completed_response.toLowerCase() === "yes") ? true : false;
+    var rating = (rating_response.toLowerCase() === "like") ? "like" : (rating_response.toLowerCase() === "dislike") ? "dislike" : "unrated";
+  
+    $.ajax({
+      url: "/update_game/" + game_id,
+      type: "POST",
+      data: { rating: rating },
+      success: function (response) {
+        console.log("Rating update response:", response); // Add this line
+  
+        // Update the rating in the table
+        if (response.success) {
+          var newRating = (rating === "like") ? "Like" : (rating === "dislike") ? "Dislike" : "Unrated";
+          var row = $("button[data-id='" + game_id + "']").closest("tr");
+          row.find(".rating").text(newRating);
+        }
+      },
+    });
+  
+    // Update the game's completed status in the database
+    $.ajax({
+      url: "/update_game_completed/" + game_id,
+      type: "POST",
+      data: { completed: completed },
+      success: function (response) {
+        console.log("Completed status update response:", response); // Add this line
+  
+        // Update the completed status in the table
+        if (response.success) {
+          var row = $("button[data-id='" + game_id + "']").closest("tr");
+          row.find(".completed").text(completed ? "Yes" : "No");
+        }
+      },
+    });
+  }
+  
 
 
   
@@ -133,6 +140,8 @@ function updateGame(game_id, completed_response, rating_response) {
 
 
 $(document).on("click", ".edit", function () {
+  console.log("Edit button clicked");
+
   var game_id = $(this).attr("data-id");
   var rating = $(this).closest("tr").find(".rating").text().trim();
   var completed = $(this).closest("tr").find(".completed").text().trim() === "Yes";
@@ -141,16 +150,22 @@ $(document).on("click", ".edit", function () {
   var rating_msg = "Did you like this game? (Like/Dislike/Unrated)";
 
   showDialogBox(completed_msg, function (response1) {
+    console.log("response1:", response1);
+
     if (response1 === "yes" || response1 === "no") {
-      var completed_response = response1;
+      console.log("answer to first as been done");
+      var completed_response = (response1.toLowerCase() === "yes") ? true : false; // Modify this line
       showDialogBox(rating_msg, function (response2) {
         if (response2 === "like" || response2 === "dislike" || response2 === "unrated") {
           updateGame(game_id, completed_response, response2);
+          updateTable();
         }
-      });
+      });     
     }
   });   
 });
+
+
 
   
   $(document).on("click", ".delete", function () {
