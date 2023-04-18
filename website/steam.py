@@ -1,8 +1,8 @@
-from website.model import Game, UserGame, Platform, userinfo, RatingEnum, db
+from website.model import Game, UserGame, Platform, userinfo, db
 import steam.webapi
 from flask import flash
 
-api_key = "0969A678DCBE10BE0AA4B40204BFAAB2"
+api_key = "4A26AAF6AC8E26A257000E3F51E3AF2B"
 steam_api = steam.webapi.WebAPI(api_key)
 
 def get_owned_games(platform_key):

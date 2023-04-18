@@ -25,7 +25,7 @@
     </header>
 
     <div class="Game-title">
-      <h1>WI5DOM Game Archive</h1>
+    <h1>WI5DOM Game Archive</h1>
     </div>
     <div class="archive">
       <form id="game-form" method="POST" action="{{ url_for('views.archive') }}">
@@ -38,12 +38,8 @@
         <input type="text" id="console-input" name="console">
         <label for="completed-input">Completed:</label>
         <input type="checkbox" id="completed-input" name="completed">
-        <label for="rating-input">Rating:</label>
-        <select id="rating-input" name="rating">
-          <option value="unrated">Unrated</option>
-          <option value="like">Like</option>
-          <option value="dislike">Dislike</option>
-        </select>
+        <label for="recommend-input">Recommend:</label>
+        <input type="checkbox" id="recommend-input" name="recommend">
         <button type="submit">Add Game</button>
       </form>      
     </div>
@@ -54,7 +50,7 @@
           <th>Genre</th>
           <th>Console</th>
           <th>Completed</th>
-          <th>Rating</th>
+          <th>Recommended</th>
           <th>Action</th>
         </tr>
       </thead>
@@ -65,17 +61,21 @@
           <td>{{ game.genre }}</td>
           <td>{{ game.console }}</td>
           <td>{{ 'Yes' if game.completed else 'No' }}</td>
-          <td>{{ game.user_games[0].rating if game.user_games else 'Unrated' }}</td>
-          <td>
-            <button class="edit" data-id="{{ game.id }}" data-completed="{{ 'true' if game.completed else 'false' }}" data-rating="{{ game.user_games[0].rating if game.user_games else 'unrated' }}">Edit</button>
+          {% if game.recommend is none %}
+          <td>unrated</td>
+          {% else %}
+          <td>{{ 'Yes' if game.recommend else 'No' }}</td>
+          {% endif %}
 
+
+          <td>
+            <button class="edit" data-id="{{ game.id }}">Edit</button>
             <button class="delete" data-id="{{ game.id }}">Delete</button>
           </td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
-  </body>
 
-</html>
+
 {% endblock %}

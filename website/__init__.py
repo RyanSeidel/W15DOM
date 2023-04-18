@@ -2,7 +2,7 @@ from flask import Flask, render_template
 from website.views import views
 from website.auth import auth
 from flask_login import LoginManager
-from website.model import Game, UserGame, Platform, userinfo, RatingEnum, db
+from website.model import Game, UserGame, Platform, userinfo,db
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 import steam.webapi
@@ -14,7 +14,7 @@ def create_app():
     app.config['SECRET_KEY'] = 'your_secret_key'
     app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:4dUPuSxKvWdh3FiCycIg@containers-us-west-202.railway.app:6607/railway'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['STEAM_API_KEY'] = '0969A678DCBE10BE0AA4B40204BFAAB2'
+    app.config['STEAM_API_KEY'] = '4A26AAF6AC8E26A257000E3F51E3AF2B'
 
     app.steam_api = steam.webapi.WebAPI(app.config['STEAM_API_KEY'])
 
