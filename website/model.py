@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
-from sqlalchemy import func, desc, case, Enum
+from sqlalchemy import func, desc, case
+from enum import Enum
 
 db = SQLAlchemy()
 
@@ -21,13 +22,13 @@ class userinfo(db.Model, UserMixin):
         return False
 
 
-
 class Platform(db.Model):
     __tablename__ = 'platform'
     
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('userinfo.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('userinfo.id', ondelete='CASCADE'), nullable=False)
     name = db.Column(db.String(100), nullable=False)
+    fetched = db.Column(db.Boolean, default=False)
     connected = db.Column(db.Boolean, default=False)
     key = db.Column(db.String(100), nullable=False)
   
@@ -43,8 +44,8 @@ class UserGame(db.Model):
     game_id = db.Column(db.Integer, db.ForeignKey('game.id', ondelete='CASCADE'), nullable=True)
     playtime = db.Column(db.Integer, nullable=True)
     owned = db.Column(db.Boolean, default=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('userinfo.id'), nullable=False)
-    rating = db.Column(db.Enum('like', 'dislike', 'unrated', name='rating_enum'), default='unrated', nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('userinfo.id', ondelete='CASCADE'), nullable=False)
+    rating = db.Column(db.Enum(RatingEnum), default=RatingEnum.UNRATED, nullable=False)
     
     game = db.relationship('Game', backref='usergames')
 
@@ -65,7 +66,7 @@ class UserGame(db.Model):
 class Game(db.Model):
     __tablename__ = 'game'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('userinfo.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('userinfo.id', ondelete='CASCADE'), nullable=False)
     name = db.Column(db.String(100), nullable=False, unique=False)
     platform_id = db.Column(db.Integer, db.ForeignKey('platform.id', ondelete='CASCADE'), nullable=False)
     genre = db.Column(db.String(100), nullable=False)
@@ -87,17 +88,21 @@ class Game(db.Model):
             'genre': self.genre,
             'console': self.console,
             'completed': self.completed,
-            'external_id': self.external_id
+            'external_id': self.external_id,
+            'image_url': self.image_url
         }
-    
-    @staticmethod
-    def add_game(user_id, name, platform_id, genre, console, completed, external_id):
-        existing_game = Game.query.filter_by(user_id=user_id, name=name).first()
-        if existing_game:
-            # game with same name already exists for this user
-            return False
 
-        new_game = Game(user_id=user_id, name=name, platform_id=platform_id, genre=genre,
-                        console=console, completed=completed, external_id=external_id)
-        db.session.add(new_game)
+    
+@staticmethod
+def add_game(user_id, name, platform_id, genre, console, completed, external_id):
+    existing_game = Game.query.filter_by(user_id=user_id, name=name).first()
+    if existing_game:
+        # game with same name already exists for this user
+        return False
+
+    new_game = Game(user_id=user_id, name=name, platform_id=platform_id, genre=genre,
+                    console=console, completed=completed, external_id=external_id)
+    db.session.add(new_game)
+    db.session.commit()  # add this line to save the new game to the database
+
        

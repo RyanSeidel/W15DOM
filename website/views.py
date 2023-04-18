@@ -1,10 +1,9 @@
 from flask import Blueprint, render_template, request, session, flash, redirect, url_for, jsonify, abort
 from flask_login import login_required, current_user
-from website.model import Game, UserGame, Platform, db, userinfo, RatingEnum
+from website.model import Game, UserGame, Platform, userinfo, RatingEnum, db
 from .forms import SearchForm
 from sqlalchemy import func, desc, case
 from sqlalchemy.orm import joinedload, contains_eager
-from website.steam import steam_api, api_key, get_owned_games
 import difflib
 import ast
 
@@ -247,14 +246,13 @@ def add_game():
     
     # create a new game and add to the database
     new_game = Game(user_id=current_user.get_id(), name=name, genre=genre,
-                    console=console, completed=completed, platform_id=platform_id, external_id=data.get('external_id'),
-                    image_url=data.get('image_url'))
-    
-    # add the rating to the UserGame table
-    new_user_game = UserGame(user_id=current_user.get_id(), game_id=new_game.id, rating=rating)
+                console=console, completed=completed, platform_id=platform_id, external_id=data.get('external_id'),
+                image_url=data.get('image_url'))
 
- 
     db.session.add(new_game)
+    db.session.commit()
+
+    new_user_game = UserGame(user_id=current_user.get_id(), game_id=new_game.id, rating=rating)
     db.session.add(new_user_game)
     db.session.commit()
 
@@ -286,22 +284,7 @@ def leaderboard():
 
 
 
-@views.route('/account')
-@login_required
-def account():
-    user_platforms = current_user.platforms
-    steam_connected = False
-    steam_fetched = session.get('steam_fetched', False)
 
-    for platform in user_platforms:
-        if platform.name == 'Steam' and platform.connected:
-            steam_connected = True
-            if not steam_fetched:
-                get_owned_games(platform_key=platform.key)
-                session['steam_fetched'] = True
-            break
-
-    return render_template('account.html', steam_connected=steam_connected)
 
 
 

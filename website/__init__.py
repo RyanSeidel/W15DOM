@@ -2,8 +2,9 @@ from flask import Flask, render_template
 from website.views import views
 from website.auth import auth
 from flask_login import LoginManager
-from website.model import userinfo, db
+from website.model import Game, UserGame, Platform, userinfo, RatingEnum, db
 from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
 import steam.webapi
 
 login_manager = LoginManager()
