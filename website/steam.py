@@ -22,27 +22,31 @@ def get_owned_games(platform_key):
 
         response = steam_api.call('IPlayerService.GetOwnedGames', steamid=steam_id, include_appinfo=1, include_played_free_games=1, include_free_sub=1, appids_filter=[], language='english', include_extended_appinfo=1)
         games = response['response']['games']
-        print(f"Games from API: {games}")
 
         exclude_keywords = ['dedicated server', 'win32', 'pc gamer', 'AMD drivers', 'AMD Driver Updater', 'Vista and 7', '32 bit', 'Dedicated Server - Win32', 'Dedicated Server - Linux']
 
         def is_game(name):
             for keyword in exclude_keywords:
                 if keyword.lower() in name.lower():
+                    print(f"Skipping game (keyword found): {name}")
                     return False
             return True
 
+
         for game in games:
+            print(f"Processing game: {game['name']}")
             game_id = game['appid']
             name = game['name']
 
-            if not is_game(name):
+            if not is_game(game['name']):
+                print(f"Skipping game: {game['name']}")
                 continue
 
             playtime = game.get('playtime_forever', 0)
 
             # check if game with same external_id already exists
-            existing_game = Game.query.filter_by(external_id=game_id).first()
+            existing_game = Game.query.filter_by(external_id=str(game_id)).first()
+
 
             if existing_game:
                 # update attributes of existing game
@@ -58,6 +62,7 @@ def get_owned_games(platform_key):
                     existing_user_game.playtime = playtime
                 else:
                     # create new user_game
+                    print(f"Adding new game: {name}")
                     new_user_game = UserGame(platform_id=platform.id, game_id=existing_game.id, playtime=playtime, owned=True, user_id=platform.user_id)
                     db.session.add(new_user_game)
             else:
@@ -81,6 +86,9 @@ def get_owned_games(platform_key):
     except Exception as e:
         db.session.rollback()
         flash(f"Failed to retrieve owned games for platform {platform.key}: {str(e)}", 'danger')
+        
+        
+
 
 
 

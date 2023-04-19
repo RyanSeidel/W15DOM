@@ -36,7 +36,7 @@ class UserGame(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     platform_id = db.Column(db.Integer, db.ForeignKey('platform.id'), nullable=False)
     game_id = db.Column(db.Integer, db.ForeignKey('game.id', ondelete='CASCADE'), nullable=True)
-    playtime = db.Column(db.Integer, nullable=True)
+    playtime = db.Column(db.Integer, nullable=True)  # Playtime will store the playtime_forever value from Steam
     owned = db.Column(db.Boolean, default=True)
     user_id = db.Column(db.Integer, db.ForeignKey('userinfo.id'), nullable=False)
     
