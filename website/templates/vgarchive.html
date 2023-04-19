@@ -63,11 +63,12 @@
           <td>{{ 'Yes' if game.completed else 'No' }}</td>
           {% if game.recommend is none %}
           <td>unrated</td>
+          {% elif game.recommend is true %}
+          <td>Like</td>
           {% else %}
-          <td>{{ 'Yes' if game.recommend else 'No' }}</td>
+          <td>Dislike</td>
           {% endif %}
-
-
+      
           <td>
             <button class="edit" data-id="{{ game.id }}">Edit</button>
             <button class="delete" data-id="{{ game.id }}">Delete</button>
@@ -75,6 +76,7 @@
         </tr>
         {% endfor %}
       </tbody>
+      
     </table>
 
 

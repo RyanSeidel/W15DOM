@@ -124,7 +124,6 @@ def get_game(game_id):
 @views.route('/update_game/<int:game_id>', methods=['POST'])
 @login_required
 def update_game(game_id):
-
     # Fetch the game from the database
     game = Game.query.get_or_404(game_id)
 
@@ -136,37 +135,14 @@ def update_game(game_id):
     # Update the game with the new data
     game.completed = 'completed' in request.form
     game.recommend = 'recommend' in request.form
+    print('game.completed: ', game.completed)
+    print('game.recommend: ', game.recommend)
 
-    rating = request.form.get('rating')
-    user_game = UserGame.query.filter_by(user_id=current_user.id, game_id=game_id).first()
-    if user_game:
-        user_game.rating = rating
-        db.session.commit()
-        return jsonify({'success': True, 'rating': user_game.rating}), 200  # Return JSON response with updated rating
-    else:
-        return jsonify({'success': False, 'error': 'You have not played this game'}), 400
+    # Save the changes to the database
+    db.session.commit()
 
-@views.route('/update_game_completed', methods=['POST'])
-@login_required
-def update_game_completed():
-    # Get the data from the request
-    name = request.form.get('name')
-    completed = request.form.get('completed')
-    
-    # Look up the game by name for the current user
-    game = Game.query.filter_by(user_id=current_user.id, name=name).first()
-
-    # If the game doesn't exist, return an error
-    if game is None:
-        return jsonify({'success': False, 'error': 'Game not found.'}), 404
-    
-    # Update the game's completion status and commit the changes
-    game.completed = (completed == 'true')
-
-    # Redirect to the archive page
-    flash('Game updated successfully', category='success')
-    return redirect(url_for('views.archive'))
-
+    # Return a JSON response indicating success
+    return jsonify({'success': True}), 200
 
 # Route for the games page
 @views.route('/games')
