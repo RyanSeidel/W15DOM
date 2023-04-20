@@ -133,8 +133,9 @@ def update_game(game_id):
         return redirect(url_for('views.archive'))
 
     # Update the game with the new data
-    game.completed = 'completed' in request.form
-    game.recommend = 'recommend' in request.form
+    game.completed = request.form.get('completed') == 'true'
+    game.recommend = request.form.get('recommend') == 'true'
+
     print('game.completed: ', game.completed)
     print('game.recommend: ', game.recommend)
 
@@ -143,6 +144,7 @@ def update_game(game_id):
 
     # Return a JSON response indicating success
     return jsonify({'success': True}), 200
+
 
 # Route for the games page
 @views.route('/games')
