@@ -271,7 +271,7 @@ $(document).on("click", ".edit", function () {
         genre: genre,
         console: gameConsole,
         completed: completed,
-        rating: rating
+        recommend: recommend, // Update the property name to "recommend"
       }),
       success: function (response) {
         if (response.success) {
@@ -280,6 +280,7 @@ $(document).on("click", ".edit", function () {
           $("#genre-input").val("");
           $("#console-input").val("");
           $("#completed-input").prop("checked", false);
+          $("#recommend-input").prop("checked", false);
     
           updateTable();
           alert("Game added successfully.");
