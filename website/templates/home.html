@@ -42,24 +42,27 @@
   <div class="container"> 
     <div class="game-lists">
       <div class="game-list">
-          <h2>Your Games</h2>
-          {% if games %}
-            {% for game, playtime in games %}
-              <div class="game">
-                <h3>{{ game.name }}</h3>
-                <p> Genre: {{ game.genre }}</p>
-                <p>Platform: {{ game.console }}</p>
-                {% if playtime %}
-                  <p>Playtime: {{ playtime }} minutes</p>
-                {% endif %}
-                <p>Recommended: {{ game.recommend }}</p>
-              </div>
-            {% endfor %}
-            {% else %}
-            <p>No games found based on your search query</p>
-          {% endif %}
+        <h2>Your Games</h2>
+        {% if games %}
+        {% for game, playtime in games %}
+        <div class="game">
+          <h3>Game Title: {{ game.name }}</h3>
+          <div class="your-games"> <!-- Add this div to wrap the game properties -->
+            <div class="game-property"><strong>Genre:</strong> {{ game.genre }}</div>
+            <div class="game-property"><strong>Recommended:</strong> {{ game.recommend }}</div>
+            <div class="game-property"><strong>Platform:</strong> {{ game.console }}</div>
+            {% if playtime %}
+              <div class="game-property"><strong>Playtime:</strong> {{ playtime }} minutes</div>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+        {% else %}
+          <p>No games found based on your search query.</p>
         {% endif %}
       </div>
     </div>
   </div>
+{% endif %}
+  
 {% endblock %}

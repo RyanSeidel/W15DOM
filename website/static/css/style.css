@@ -284,23 +284,22 @@
   background-color: #666;
 }
 
-/* game lists */
+/* Game Lists */
 .game-lists {
   display: flex;
   gap: 4rem;
   justify-content: center;
-  align-items: flex-start; /* added */
+  align-items: flex-start; /* Added */
 }
-
 
 .game-list {
   border: 2px solid #333;
   padding: 2rem;
   width: 50%;
-  display: block; /* added */
+  background-color: #a5d8ff;
+  display: block; /* Added */
   font-size: 1.4rem;
 }
-
 
 @media only screen and (min-width: 768px) {
   .game-list {
@@ -314,7 +313,27 @@
 }
 
 .game {
-  margin-bottom: 1rem;
+  margin-bottom: 2rem; /* Increase spacing between games */
+  padding: 1rem; /* Add padding inside each game */
+  border: 1px solid #333; /* Add a light gray border outline */
+  border-radius: 5px; /* Add rounded corners */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Add a subtle box shadow */
+}
+
+.your-games {
+  display: grid;
+  flex-direction: row;
+  align-items: center;
+  font-size: 1.6rem;
+  grid-template-columns: repeat(2, 1fr); 
+  gap: 2rem;
+  font-weight: 500;
+  padding-bottom: 4rem;
+}
+
+
+.game-property {
+  flex-basis: calc(50% - 0.25rem);
 }
 
 .game h3 {
@@ -324,7 +343,7 @@
 }
 
 .game p {
-  margin-bottom: 0.50rem;
+  margin-bottom: 0.5rem;
 }
 
 .game p:last-child {
@@ -342,7 +361,8 @@
 
 /* Display All Button */
 .show-all-btn {
-  padding: 1rem 2-color: #333;
+  padding: 1rem;
+  background-color: #333;
   color: #fff;
   border: none;
   cursor: pointer;
@@ -356,7 +376,6 @@
 .text-center {
   text-align: center;
 }
-
 
 /**************************/
 /* Account Page */
@@ -514,3 +533,79 @@ input[type="text"], input[type="email"], input[type="password"] {
   color: #1a1a1a;
 }
 */
+
+/**************************/
+/* Footer  */
+/**************************/
+
+.footer {
+  padding: 12.8rem 0;
+  border-top: 1px solid #eee;
+}
+
+.grid--footer {
+  grid-template-columns: 1.5fr 1.5fr 1fr 1fr 1fr;
+}
+
+.logo-col{
+  display: flex;
+  flex-direction: column;
+}
+
+.footer-logo{
+  display: block;
+  margin-bottom: 3.2rem;
+}
+.social-links{
+  list-style: none;
+  display: flex;
+  gap: 2.4rem;
+}
+
+.social-icon{
+  height: 2.4rem;
+  width: 2.4rem;
+}
+
+.copyright{
+  font-size: 1.4rem;
+  line-height: 1.6rem;
+  color: black;
+  margin-top: auto;
+
+}
+.footer-heading{
+  font-size: 1.8rem;
+  font-weight: 500;
+  margin-bottom: 4rem;
+}
+
+.contacts {
+  font-style: normal;
+  font-size: 1.6rem;
+  line-height: 1.6;
+
+}
+
+.address {
+  margin-bottom: 2.4rem;
+}
+.footer-nav{
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2.4rem;
+}
+
+.footer-link:link, .footer-link:visited{
+  text-decoration: none;
+  font-size: 1.6rem;
+  color: black;
+
+  transition: all 0.3s;
+
+}
+
+.footer-link:hover, .footer-link:active{
+  color: #555;
+}

@@ -79,13 +79,28 @@ body {
 /* GENRAL REUSABLE COMPONENTS */
 /**************************/
 
-.container {
+.container
+{
+    /* 1140px */
+    max-width: 150rem;
+    padding: 0 3.2rem;
+    margin: 0 auto;
+}
+.container-line {
   /* 1140px */
   max-width: 150rem;
   padding: 0 3.2rem;
   margin: 0 auto;
   border-left: 1px solid rgba(0, 0, 0, 0.87);
   border-right: 1px solid rgba(0, 0, 0, 0.767);
+}
+
+.container-3 {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.87);
+}
+
+.container-4 {
+  border-top: 1px solid rgba(0, 0, 0, 0.87);
 }
 
 .section-color{
