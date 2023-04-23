@@ -38,8 +38,7 @@
     </button>        
 </form>
 
-
-  {% if session.show_games %}
+{% if session.show_games %}
   <div class="container"> 
     <div class="game-lists">
       <div class="game-list">
@@ -50,7 +49,9 @@
                 <h3>{{ game.name }}</h3>
                 <p> Genre: {{ game.genre }}</p>
                 <p>Platform: {{ game.console }}</p>
-                <p>Playtime: {{ playtime }} minutes</p>
+                {% if playtime %}
+                  <p>Playtime: {{ playtime }} minutes</p>
+                {% endif %}
                 <p>Recommended: {{ game.recommend }}</p>
               </div>
             {% endfor %}

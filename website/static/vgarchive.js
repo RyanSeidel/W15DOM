@@ -19,7 +19,8 @@ $(document).ready(function () {
             type: "POST",
             data: {
               name: game.name,
-              completed: game.completed ? "true" : "false"
+              completed: game.completed ? "true" : "false",
+              recommended: recommend_response !== undefined ? recommend_response : null
             },
             success: function(response) {
               console.log("Completed status update response:", response);
@@ -114,7 +115,7 @@ $(document).ready(function () {
             .text(game.completed ? "Yes" : "No")
             .appendTo(row);
           $("<td>")
-            .addClass("recommended") // Add the "recommended" class here
+            .addClass("recommend")
             .text(game.recommend == null ? "Unrated" : (game.recommend ? "Like" : "Dislike"))
             .appendTo(row);
   
@@ -138,30 +139,32 @@ $(document).ready(function () {
         $("#game-table").replaceWith(table);
       },
     });
-  }
-  
+  } 
   
   function showDialogBox(message, callback, title) {
     title = title ? title : (callback ? "Confirm" : "Error");
     var box = $("<div>").attr("title", title).addClass("dialog-box");
     $("<p>").text(message).appendTo(box).addClass("dialog-text");
     if (callback) {
+        var buttons = {
+            Yes: function () {
+                $(this).dialog("close");
+                callback("yes");
+            },
+            No: function () {
+                $(this).dialog("close");
+                callback("no");
+            }
+        };
+        if (message.toLowerCase().startsWith("do you recommend")) {
+            buttons["Unrate"] = function () {
+                $(this).dialog("close");
+                callback("cancel");
+            };
+        }
         box.dialog({
             modal: true,
-            buttons: {
-                Yes: function () {
-                    $(this).dialog("close");
-                    callback("yes");
-                },
-                No: function () {
-                    $(this).dialog("close");
-                    callback("no");
-                },
-                Cancel: function () {
-                    $(this).dialog("close");
-                    callback("cancel");
-                },
-            },
+            buttons: buttons,
         });
     } else {
         box.dialog({
@@ -175,36 +178,34 @@ $(document).ready(function () {
     }
 }
 
-
-$(document).on("click", ".edit", function () {
-  console.log("Edit button clicked");
-
-  var game_id = $(this).attr("data-id");
-  var completed = ($(this).closest("tr").find(".completed").text().trim().toLowerCase() === "yes");
-
-  var completed_msg = "Have you completed the game? (Yes/No)";
-  var recommend_msg = "Do you recommend this game? (Yes/No)";
-
-  showDialogBox(completed_msg, function (response1) {
-    console.log("response1:", response1);
-
-    var completed_response = response1.toLowerCase() === "yes";
-
-    showDialogBox(recommend_msg, function (response2) {
-      console.log("response2:", response2);
-
-      var recommend_response;
-      if (response2.toLowerCase() === "yes") {
-        recommend_response = true;
-      } else if (response2.toLowerCase() === "no") {
-        recommend_response = false;
-      }
-
-      updateGame(game_id, completed_response, recommend_response);
-      updateTable();
-    });
+  
+  $(document).on("click", ".edit", function () {
+    console.log("Edit button clicked");
+  
+    var game_id = $(this).attr("data-id");
+    var completed = ($(this).closest("tr").find(".completed").text().trim().toLowerCase() === "yes");
+  
+    var completed_msg = "Have you completed the game? (Yes/No)";
+    showDialogBox(completed_msg, function (response1) {
+      var completed_response = (response1.toLowerCase() === "yes");
+  
+      var recommend_msg = "Do you recommend this game? (Yes/No/Unrate)";
+      showDialogBox(recommend_msg, function (response2) {
+        var recommend_response = null;
+        if (response2.toLowerCase() === "yes") {
+          recommend_response = true;
+        } else if (response2.toLowerCase() === "no") {
+          recommend_response = false;
+        }
+  
+        updateGame(game_id, completed_response, recommend_response);
+        updateTable();
+      });
+    }, "Edit Game");
   });
-});
+  
+
+
  
   $(document).on("click", ".delete", function () {
     var game_id = $(this).attr("data-id");
