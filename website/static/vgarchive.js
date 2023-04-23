@@ -205,17 +205,7 @@ $(document).on("click", ".edit", function () {
     });
   });
 });
-
-
-
-
-
-
-
-
-
-
-  
+ 
   $(document).on("click", ".delete", function () {
     var game_id = $(this).attr("data-id");
 
@@ -244,6 +234,30 @@ $(document).on("click", ".edit", function () {
       },
     });
   });
+
+  function deleteGame(game_id) {
+  $.ajax({
+    url: "/delete_game/" + game_id,
+    type: "DELETE",
+    success: function (response) {
+      if (response.success) {
+        // Remove the game row from the table
+        $("button[data-id='" + game_id + "']").closest("tr").remove();
+
+        // Display a success message
+        alert("Game deleted successfully.");
+      } else {
+        console.log("Error deleting game: " + response.error);
+        alert("Error deleting game: " + response.error);
+      }
+    },
+    error: function (xhr, status, error) {
+      console.log("Error deleting game: " + error);
+      alert("Error deleting game: " + error);
+    },
+  });
+}
+
 
   // Function to handle the form submission for adding a new game
   $("#game-form").submit(function (event) {

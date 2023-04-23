@@ -3,59 +3,25 @@
 
 {% block title %}Home Page{% endblock %}
 
-{% block header %}
-<script>
-  function onRegisterAttempt() {
-    
-    console.log(document.getElementById("email").value.length)
-
-    const data = {
-    name: document.getElementById("username").value,
-    email: document.getElementById("email").value,
-    password: document.getElementById("password").value
-    };
-
-    fetch("/", {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(data)
-    })
-  .then(response => response.json())
-  .then(data => {
-        if(data.message === "error"){
-        document.getElementById("register-error").innerHTML = "Error: "+data.value
-        }
-        if(data.message === "success"){
-          window.location.href = "/login"
-        }
-      })
-  .catch(error => {
-  console.error('Error:', error);
-  });
-}
-</script>
-{% endblock %}
-
 {% block content %}
+
   <body>
     <header class="header sticky">
-      <a href="/">
+      <a href="#home">
         <img class="logo" alt="W15DOM logo" src="{{ url_for('static', filename='images/w15domlogo.png') }}" />
       </a>
 
       <nav class="main-nav">
         <ul class="main-nav-list">
-          <li><a class="main-nav-link" href="#">Home</a></li>
-          <li><a class="main-nav-link" href="#about-us">About us</a></li>
-          <li><a class="main-nav-link" href="/login">Join now</a></li>
+          <li><a class="main-nav-link" href="#home">Home</a></li>
+          <li><a class="main-nav-link" href="#aboutus">About us</a></li>
+          <li><a class="main-nav-link" href="/login">Log In</a></li>
         </ul>
       </nav>
     </header>
 
     <main>
-      <section class="section-hero">
+      <section class="section-hero" id="home">
         <h1 class="heading-primary">
           A fun way to collect your games!
             </h1>
@@ -65,33 +31,33 @@
             <p class="hero-description">Starting being a game pro by managing your data!
             </p>
             <a href="#signup" class="btn btn--full margin-right-sm"
-              >Sign up Now!</a
-            >
-            <a href="#how" class="btn btn--outline">Learn more &darr;</a>
+              >Sign up Now!</a>
+            <a href="#aboutus" class="btn btn--outline">Learn more &darr;</a>
           </div>
         </div>
         </section>
 
         <section class="section-color features">
           <div class="container">
-          <span> Ninetendo Playstation XBOX</span>
+            <div class="about-us-one">
+              <div class="about-text">
+          <span> SPOTLIGHT GAME : LEAGUEEE</span>
+        </div>
+        </div>
         </div>
         </section>
 
-        <section class="section-color about-us" id="signup">
-          <div class="container">
-          <span> What we are, who we are</span>
-        </div>
-        </section>
-        <section class="section-color">
+        
+
+      
+        <section class="section-color" id="signup">
           <div class="container">
             <div class="sign">
               <div class="sign-text-box">
                 <h2 class="heading-secondary">Register Account</h2>
-                <h2 style="color:rgb(139, 16, 16)" id="register-error"></h2>
               
               <div>
-                <form class="sign-form" action="javascript:onRegisterAttempt()">
+                <form class="sign-form" method="POST" action="#">
                   <div>
                     <label for="email">Email<br></label>
                     <input id="email" name="email" type="text" class="email-field" placeholder="ex: me@example.com" required>
@@ -108,7 +74,34 @@
                 </form>
               </div>                
           </div>
-        </section>
+         </section>
+              
+
+<section class="section-color" id="aboutus">
+          <div class="container">
+            <div class="about-us-one">
+              <div class="about-text">
+                <section>
+        <!--was generated with the assistance of chatgpt-->
+			<h3> About Us </h3>
+			<p>WI5DOM is an application that provides all users the ability to log games. Our team of experienced developers         and designers are passionate about creating high-quality applications that are tailored to the unique needs of our       clients.</p>
+			<h3>Our Mission</h3>
+			<p>At WI5DOM, our mission is to help businesses succeed by providing them with the tools and expertise they need         to thrive in the digital marketplace. We believe that a great website can be a game-changer for businesses, and we       are committed to helping our clients achieve their goals.</p>
+			<h3>Contact Us</h3>
+			<p>If you're interested in learning more about WI5DOM, please don't hesitate to get in touch. You can reach us by         phone at 123-456-7890 or by email at WI5DOM@help.com.</p>
+		</section>
+          
+
+          </div>
+        </div>
+        </div>
+        </div>
+        </section> 
+
+
+
+
+              
 </body>
 </html>
 

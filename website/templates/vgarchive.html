@@ -4,6 +4,8 @@
 
 {% block content %}
   <body>
+           <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+          <link rel="stylesheet" href="{{ url_for('static', filename='css/vgarchive.css') }}">
 
     <header class="header ">
       <div class="logo-container">
@@ -40,7 +42,7 @@
         <input type="checkbox" id="completed-input" name="completed">
         <label for="recommend-input">Recommend:</label>
         <input type="checkbox" id="recommend-input" name="recommend">
-        <button type="submit">Add Game</button>
+        <button class="submit">Add Game</button>
       </form>      
     </div>
     <table id="game-table">

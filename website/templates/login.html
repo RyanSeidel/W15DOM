@@ -1,24 +1,10 @@
 {% extends 'base.html' %}
 {% block content %}
-<header class="header sticky">
-  <a href="#">
-    <img class="logo" alt="W15DOM logo" src="{{ url_for('static', filename='images/w15domlogo.png') }}" />
-  </a>
-
-  <nav class="main-nav">
-    <ul class="main-nav-list">
-      <li><a class="main-nav-link" href="/">Home</a></li>
-      <li><a class="main-nav-link" href="#about-us">About us</a></li>
-      <li><a class="main-nav-link" href="/login">Join now</a></li>
-    </ul>
-  </nav>
-</header>
-
 <section class="section-login">
   <div class="container-login">
     <div class="sign">
       <div class="sign-text-box">
-        <h2 class="heading-secondary">Login</h2>
+        <h2 class="heading-secondary">Log In</h2>
         <form class="sign-form" method="POST">
           <div>
             <label for="email">Email</label>

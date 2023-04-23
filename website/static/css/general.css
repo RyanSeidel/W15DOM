@@ -68,8 +68,8 @@ body {
   font-family: "Rubik", sans-serif;
   line-height: 1;
   font-weight: 400;
-  color: #112A46;
-
+  color:#112;
+  background-color:#b097fc66;
   /* Only works if there is nothing absolutely positioned in relation to body */
   overflow-x: hidden;
   
@@ -89,7 +89,7 @@ body {
 }
 
 .section-color{
-  background-image: linear-gradient(to bottom left,#d0bfff, #a5d8ff);
+  background-image: linear-gradient(to bottom left,#d0bfff, #87CEEE);
 }
 
 .grid {
