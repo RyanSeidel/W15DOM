@@ -224,9 +224,10 @@ def help():
 @views.route('/leaderboard')
 @login_required
 def leaderboard():
-    games = (db.session.query(Game.name, Game.image_url, func.sum(UserGame.playtime).label('total_playtime'))
+    games = (db.session.query(Game.name, Game.image_url, func.sum(UserGame.playtime).label('total_playtime'),
+                          func.sum(case((Game.recommend == True, 1), else_=0)).label('total_likes'),
+                          func.sum(case((Game.recommend == False, 1), else_=0)).label('total_dislikes'))
              .join(Game.user_games)
-             .filter(UserGame.user_id == current_user.id)
              .filter(UserGame.playtime != None)
              .group_by(Game.id)
              .order_by(desc('total_playtime'))
@@ -234,7 +235,8 @@ def leaderboard():
              .all())
 
 
-    return render_template('leaderboard.html', games=games, current_user=current_user)
+    return render_template('leaderboard.html', games=games)
+
 
 @views.route('/import_games', methods=['POST'])
 @login_required
