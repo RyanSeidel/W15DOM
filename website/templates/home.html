@@ -3,6 +3,68 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
+<head>
+<style>
+
+#submit-btn{
+  border: none;
+  border-radius: 9px;
+  color: #fdf2eg;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 5px;
+  transition: all 0.2s ease-in-out;
+  margin-left: 10px;
+  height: 15%;
+ 
+  
+}  
+.search-form{
+  
+  text-decoration: none;
+  color: #112A46;
+  font-weight: 500;
+  font-size: 3rem;
+  transition: all 0.3s;
+ 
+  
+}
+#search-input{
+  
+  width: 20rem;
+  height: 3rem;
+  font-size: 20px;
+  margin-left: 5px;
+  margin-top: 5px;
+  margin-right: 5px;
+  
+  
+ 
+  
+}
+  
+#toggle-games-btn{
+  border: none;
+  border-radius: 9px;
+  color: #fdf2eg;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 5px;
+  transition: all 0.2s ease-in-out;
+  margin-left: 5px;
+  height: 15%;
+ 
+  
+}
+
+.search-form{
+  width: 100%; /* Adjust the width as needed */
+    
+}
+
+</style>
+  
+</head>
   <header class="header ">
     <div class="logo-container">
       <a href="#">
@@ -20,6 +82,7 @@
         <li><a class="home-nav-link" href="/logout">Logout</a></li>
       </ul>
     </nav>
+  
   </header>
 
   <h1> Welcome to the Timeline {{ username }}! </h1>
@@ -29,7 +92,7 @@
     {{ form.search.label }} {{ form.search(id='search-input') }} {{ form.submit(id='submit-btn') }}
 
     <!-- Add this button element -->
-    <button id="toggle-games-btn" type="submit" name="toggle-games-btn" data-show-games="{% if session.show_games %}true{% else %}false{% endif %}">
+    <button  id="toggle-games-btn" type="submit" name="toggle-games-btn" data-show-games="{% if session.show_games %}true{% else %}false{% endif %}">
       {% if session.show_games %}
         Hide My Games
       {% else %}
@@ -44,19 +107,27 @@
       <div class="game-list">
         <h2>Your Games</h2>
         {% if games %}
-        {% for game, playtime in games %}
+        {% for game, playtime, last_played, completion_percentage, total_achievements in games %}
         <div class="game">
-          <h3>Game Title: {{ game.name }}</h3>
-          <div class="your-games"> <!-- Add this div to wrap the game properties -->
+            <h3>Game Title: <span class="game-name">{{ game.name }}</span></h3>
+            {% if game.image_url %}
+            <img src="{{ game.image_url }}" alt="{{ game.name }} image" class="my-game-img" width="200" height="100"/>
+          {% endif %}
+          <div class="your-games">
             <div class="game-property"><strong>Genre:</strong> {{ game.genre }}</div>
             <div class="game-property"><strong>Recommended:</strong> {{ game.recommend }}</div>
             <div class="game-property"><strong>Platform:</strong> {{ game.console }}</div>
             {% if playtime %}
               <div class="game-property"><strong>Playtime:</strong> {{ playtime }} minutes</div>
             {% endif %}
+            {% if total_achievements is not none %}
+    <div class="game-property"><strong>Achievements completion:</strong> {{ completion_percentage }}  out of {{ total_achievements }}</div>
+{% endif %}
+            <div class="game-property"><strong>Last Played:</strong> {{ last_played }}</div>
           </div>
         </div>
       {% endfor %}
+      
         {% else %}
           <p>No games found based on your search query.</p>
         {% endif %}

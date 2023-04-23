@@ -39,8 +39,8 @@ class UserGame(db.Model):
     playtime = db.Column(db.Integer, nullable=True)  # Playtime will store the playtime_forever value from Steam
     owned = db.Column(db.Boolean, default=True)
     user_id = db.Column(db.Integer, db.ForeignKey('userinfo.id'), nullable=False)
-    last_played = db.Column(db.String(20), nullable=True)  # Change to string column with length 20
-    
+    last_played = db.Column(db.DateTime, nullable=True)  # Add a new column for last played date
+    completion_percentage = db.Column(db.Float, default=0)
     game = db.relationship('Game', backref='user_games')
 
 class Game(db.Model):
@@ -56,6 +56,7 @@ class Game(db.Model):
     recommend = db.Column(db.Boolean, default=None, nullable = True)
     external_id = db.Column(db.String(100))
     image_url = db.Column(db.String(200))
+    total_achievements = db.Column(db.Integer, default=0)  # Add this line
 
 
     platform = db.relationship('Platform', backref=db.backref('games', lazy=True))
