@@ -39,7 +39,7 @@ class UserGame(db.Model):
     playtime = db.Column(db.Integer, nullable=True)  # Playtime will store the playtime_forever value from Steam
     owned = db.Column(db.Boolean, default=True)
     user_id = db.Column(db.Integer, db.ForeignKey('userinfo.id'), nullable=False)
-    last_played = db.Column(db.DateTime, nullable=True)  # Add a new column for last played date
+    last_played = db.Column(db.String(20), nullable=True)  # Change to string column with length 20
     
     game = db.relationship('Game', backref='user_games')
 

@@ -49,10 +49,12 @@ def get_owned_games(platform_key):
 
             # get last played time for game
             rtime_last_played = game.get('rtime_last_played', None)
+    
             last_played = None
             if rtime_last_played:
-                last_played = datetime.fromtimestamp(rtime_last_played)
+                last_played = datetime.fromtimestamp(rtime_last_played).strftime('%Y-%m-%d %H:%M:%S')
                 print(f"Last played for {name}: {last_played}")
+
 
             # check if game with same external_id already exists
             existing_game = Game.query.filter_by(external_id=str(game_id)).first()
@@ -70,6 +72,7 @@ def get_owned_games(platform_key):
                     # update existing user_game
                     existing_user_game.playtime = playtime
                     existing_user_game.last_played = last_played
+
                 else:
                     # create new user_game
                     print(f"Adding new game: {name}")
