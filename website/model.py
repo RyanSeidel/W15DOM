@@ -40,7 +40,7 @@ class UserGame(db.Model):
     owned = db.Column(db.Boolean, default=True)
     user_id = db.Column(db.Integer, db.ForeignKey('userinfo.id'), nullable=False)
     last_played = db.Column(db.DateTime, nullable=True)  # Add a new column for last played date
-    completion_percentage = db.Column(db.Float, default=0)
+    completion_percentage = db.Column(db.Integer, default=0)
     game = db.relationship('Game', backref='user_games')
 
 class Game(db.Model):
