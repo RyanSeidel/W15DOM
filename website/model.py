@@ -40,11 +40,10 @@ class UserGame(db.Model):
     owned = db.Column(db.Boolean, default=True)
     user_id = db.Column(db.Integer, db.ForeignKey('userinfo.id'), nullable=False)
     last_played = db.Column(db.DateTime, nullable=True)  # Add a new column for last played date
-<<<<<<< HEAD
+
     completion_achievements = db.Column(db.Integer, default=0)
-=======
-    
->>>>>>> parent of 8659ff8 (LETS GOOO)
+
+
     game = db.relationship('Game', backref='user_games')
 
 class Game(db.Model):

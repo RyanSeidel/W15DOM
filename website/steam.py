@@ -91,14 +91,11 @@ def get_owned_games(platform_key):
                 last_played = datetime.fromtimestamp(rtime_last_played)
                 print(f"Last played for {name}: {last_played}")
                 
-
-<<<<<<< HEAD
             # Get the number of completed achievements for the game
             completed_achievements_count, total_achievements_count, completion_percentage = get_player_achievements_count(steam_id, game_id, api_key)
             
 
-=======
->>>>>>> parent of 8659ff8 (LETS GOOO)
+
             # check if game with same external_id already exists
             existing_game = Game.query.filter_by(external_id=str(game_id)).first()
 
@@ -116,10 +113,9 @@ def get_owned_games(platform_key):
                     # update existing user_game
                     existing_user_game.playtime = playtime
                     existing_user_game.last_played = last_played
-<<<<<<< HEAD
+
                     existing_user_game.completion_percentage = completed_achievements_count
-=======
->>>>>>> parent of 8659ff8 (LETS GOOO)
+
                 else:
                     # create new user_game
                     print(f"Adding new game: {name}")
