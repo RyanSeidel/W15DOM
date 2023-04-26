@@ -25,13 +25,12 @@ def home():
     form.search_filter.choices = filter_choices
 
     # Querying for user's games ordered by playtime in descending order
-    all_games = Game.query\
-    .outerjoin(UserGame, Game.id == UserGame.game_id)\
-    .filter((UserGame.user_id == current_user.id) | (Game.user_id == current_user.id))\
-    .with_entities(Game, UserGame.playtime, UserGame.last_played,UserGame.completion_achievements, Game.total_achievements)\
-    .order_by(UserGame.playtime.desc().nullslast(), Game.name)\
+    all_games = Game.query \
+    .outerjoin(UserGame, (Game.id == UserGame.game_id) & (UserGame.user_id == current_user.id)) \
+    .filter((UserGame.user_id == current_user.id) | (Game.user_id == current_user.id)) \
+    .with_entities(Game, UserGame.playtime, UserGame.last_played, UserGame.completion_achievements, Game.total_achievements) \
+    .order_by(UserGame.playtime.desc().nullslast(), Game.name) \
     .all()
-
 
     games = all_games
     search_string = ''  # Initialize the search_string variable
@@ -45,9 +44,9 @@ def home():
 
             # Filtering the games based on the search filter and the search string
             if search_filter and search_string:
-                games = [(game, playtime, last_played, completion_achievements, total_achievements) for game, playtime, last_played, completion_achievements, total_achievements in all_games if search_string in str(getattr(game, search_filter)).lower()]
+                games = [(game, playtime) for game, playtime in all_games if search_string in str(getattr(game, search_filter)).lower()]
             elif search_string:
-                games = [(game, playtime, last_played, completion_achievements, total_achievements) for game, playtime, last_played, completion_achievements, total_achievements in all_games if search_string in game.name.lower()]
+                games = [(game, playtime) for game, playtime in all_games if search_string in game.name.lower()]
             else:
                 games = all_games
 
@@ -67,7 +66,6 @@ def home():
     return render_template('home.html', form=form, username=current_user.name, games=games, search_string=search_string)
 
 
-
 @views.route('/get_games')
 @login_required
 def get_games():
@@ -84,6 +82,7 @@ def get_games():
             'console': game.console,
             'completed': game.completed,
             'recommend': game.recommend,
+            'completed': game.completed
         }
         game_list.append(game_dict)
 
@@ -249,20 +248,6 @@ def import_games():
     else:
         flash('Steam platform not found for current user', 'warning')
         return redirect(url_for('views.account'))
-
-@views.route('/account')
-@login_required
-def account():
-    user_platforms = current_user.platforms
-    steam_connected = False
-
-    for platform in user_platforms:
-        if platform.name == 'Steam' and platform.connected:
-            steam_connected = True
-            get_owned_games(platform_key=platform.key)
-            break
-
-    return render_template('account.html', steam_connected=steam_connected)
 
 
 

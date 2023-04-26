@@ -1,26 +1,35 @@
 {% extends 'base.html' %}
+
 {% block content %}
-<section class="section-login">
-  <div class="container-login">
-    <div class="sign">
-      <div class="sign-text-box">
-        <h2 class="heading-secondary">Log In</h2>
-        <form class="sign-form" method="POST">
-          <div>
-            <label for="email">Email</label>
-            <input id="email" name="email" type="text" class="email-field" placeholder="ex: me@example.com" required>
-          </div>
-          <div class="last-input">
-            <label for="password">Password</label>
-            <input id="password" type="password" name="password" placeholder="do not share!" required>
-          </div>
-          <div class="grid-cols-2">
-          <button class="btn-sign" type="submit">Login</button>
-          <a href="/" class="btn-sign btn-back">Back</a>
-          </div>
-        </form>
+  <style>
+    .section-login input{
+      color: black; !important
+    }
+  </style>
+
+  <section class="section-login">
+    <div class="container-login">
+      <div class="sign">
+        <div class="login-text-box">
+          <h2 class="heading-secondary gray-color">Log In</h2>
+          <form class="sign-form" method="POST">
+            <div>
+              <div class="gray-color">
+                <label for="email">Email</label>
+                <input id="email" name="email" type="text" class="email-field" placeholder="ex: me@example.com" required>
+              </div>
+            </div>
+            <div class="last-input gray-color">
+              <label for="password">Password</label>
+              <input id="password" type="password" name="password" placeholder="do not share!" required>
+            </div>
+            <div class="grid-cols-2">
+              <button class="btn-sign" type="submit">Login</button>
+              <a href="/" class="btn-sign btn-back">Back</a>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 {% endblock %}

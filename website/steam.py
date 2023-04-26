@@ -6,8 +6,6 @@ import requests
 import json
 
 
-# rest of the code
-
 
 api_key = "4A26AAF6AC8E26A257000E3F51E3AF2B"
 steam_api = steam.webapi.WebAPI(api_key)
@@ -64,7 +62,7 @@ def get_owned_games(platform_key):
     games = response['response']['games']
 
     def is_game(name):
-        exclude_keywords = ['dedicated server', 'win32', 'pc gamer', 'AMD drivers', 'AMD Driver Updater', 'Vista and 7', '32 bit', 'Dedicated Server - Win32', 'Dedicated Server - Linux', 'Paladins - Public Test', 'AMD Driver Updator, Vista and 7, 64 bit image', 'Test Server', 'Public Test']
+        exclude_keywords = ['dedicated server', 'win32', 'pc gamer', 'AMD drivers', 'AMD Driver Updater', 'Vista and 7', '32 bit', 'Dedicated Server - Win32', 'Dedicated Server - Linux', 'Paladins - Public Test', 'AMD Driver Updator, Vista and 7, 64 bit image', 'Test Server', 'Public Test','Dragon Age: Origins Character Creator']
         for keyword in exclude_keywords:
             if keyword.lower() in name.lower():
                 return False
@@ -129,17 +127,16 @@ def get_owned_games(platform_key):
                 db.session.add(new_user_game)
         else:
             # create new game
-            new_game = Game(user_id=platform.user_id, name=name, platform_id=platform.id, genre=genres, console='Steam',completed = False, recommend = None, external_id=str(game_id),image_url = img_url, total_achievements=total_count)
+            new_game = Game(user_id=platform.user_id, name=name, platform_id=platform.id, genre=genres, console='Steam',completed=False, recommend=None, external_id=str(game_id), image_url=img_url, total_achievements=total_count)
             db.session.add(new_game)
+            db.session.flush()  # Flush the new_game object to get its game_id
+            db.session.refresh(new_game)  # Refresh the new_game object to reflect the updated game_id
+            
             # create new user_game
-            new_user_game = UserGame(platform_id=game_id, game_id=platform.id, playtime=playtime, owned=True, user_id=platform.user_id, last_played=last_time, completion_achievements=completed_count)
+            new_user_game = UserGame(platform_id=platform.id, game_id=new_game.id, playtime=playtime, owned=True, user_id=platform.user_id, last_played=last_time, completion_achievements=completed_count)
             db.session.add(new_user_game)
 
         db.session.commit()
-
-
-
-
 
 
 

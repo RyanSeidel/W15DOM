@@ -118,6 +118,42 @@ checkFlexGap();
       toggleGamesBtn.innerHTML = 'Show My Games';
     }
 
+    
+///////////////////////////////////////////////////////////
+// Register Login Button
+$(document).ready(function () {
+  $("#signup-form").on("submit", function (event) {
+      event.preventDefault();
+
+      const email = $("#email").val();
+      const name = $("#username").val();
+      const password = $("#password").val();
+
+      $.ajax({
+        url: '/',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+            email: email,
+            name: name,
+            password: password
+        }),
+        success: function (response) {
+            if (response.message === 'success') {
+                window.location.href = '/login';
+            } else {
+                alert(response.value);
+            }
+        },
+        error: function (response) {
+            alert('An error occurred. Please try again.');
+        }
+    });
+    
+  });
+});
+
+
 
 
 

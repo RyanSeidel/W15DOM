@@ -48,15 +48,20 @@
     {% if 'steam_user' in session %}
       <p>Steam ID: {{ session['steam_user']['steamid'] }}</p>
     {% endif %}
+    
     <form action="{{ url_for('auth.steam_disconnect') }}" method="post">
+      <div class="flex">
       <input type="hidden" name="_method" value="DELETE">
       <img src="{{ url_for('static', filename='images/steam-icon.png') }}" alt="Steam Icon" style="width: 3.5rem; height: 3.5rem; vertical-align: middle; margin-right: 1rem;">
       <button type="submit" id="btn">Disconnect Steam Account</button>
+     </div>
     </form>
   {% else %}
     <p>Not connected to Steam</p>
+    <div class="flex">
     <img src="{{ url_for('static', filename='images/steam-icon.png') }}" alt="Steam Icon" style="width: 3.5rem; height: 3.5rem; vertical-align: middle; margin-right: 1rem;">
-    <a href="{{ url_for('auth.steam_login') }}">Connect Steam Account</a>
+    <a class="steam-text" href="{{ url_for('auth.steam_login') }}">Connect Steam Account</a>
+    </div>
   {% endif %}
 </div>
   </div>

@@ -234,7 +234,7 @@ body {
 /* Font Size */
 .font-size
 {
-    font-size: 2.4rem;
+    font-size: 1.6rem;
     font-weight: 500;
 }
 
@@ -274,4 +274,16 @@ body {
 .bottom {
   margin-bottom: 14.4rem;
 }
+
+input {
+  color: black;
+}
+
+.flex{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
 

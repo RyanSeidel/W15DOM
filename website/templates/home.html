@@ -124,7 +124,8 @@
               <div class="game-property"><strong>Playtime:</strong> 
                 {{ playtime }} minutes</div>
             {% endif %}
-            {% if completion_achievements, total_achievements is not none %}
+            {% if completion_achievements != 0 and total_achievements != 0 %}
+
   <div class="game-property">
     <strong>Achievements completion:</strong>
     <div class="completion-info">
@@ -132,7 +133,9 @@
     </div>
   </div>
 {% endif %}
+{% if last_played %}
             <div class="game-property"><strong>Last Played:</strong><div class="completion-info"> {{ last_played }}</div></div>
+            {% endif %}
           </div>
         </div>
       {% endfor %}

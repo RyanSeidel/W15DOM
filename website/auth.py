@@ -5,10 +5,45 @@ from website.model import db, userinfo, Game, UserGame, Platform
 from website.steam import steam_api, api_key, get_owned_games
 import requests
 from sqlalchemy import exists, and_
+from .forms import SignupForm
+
 
 
 auth = Blueprint('auth', __name__)
 
+
+
+@auth.route('/', methods=['GET', 'POST'])
+def signup():
+    if current_user.is_authenticated:
+        return redirect(url_for('views.home'))
+
+    form = SignupForm()
+
+    if form.validate_on_submit():
+        email = form.email.data
+        name = form.name.data
+        password = form.password.data
+
+        user_email = userinfo.query.filter_by(email=email).first()
+        if user_email:
+            flash('Email already exists', category='error')
+            return redirect(url_for('auth.signup'))
+
+        user_name = userinfo.query.filter_by(name=name).first()
+        if user_name:
+            flash('Username already exists', category='error')
+            return redirect(url_for('auth.signup'))
+
+        new_user = userinfo(email=email, name=name, password=generate_password_hash(
+            password, method='sha256'))
+        db.session.add(new_user)
+        db.session.commit()
+
+        flash('Account created', category='success')
+        return redirect(url_for('auth.login'))
+
+    return render_template('index.html', form=form)
 
 #  Login Feature 
 @auth.route('/login', methods=['GET', 'POST'])
@@ -28,45 +63,6 @@ def login():
             flash('Incorrect email or password', category='error')
 
     return render_template('login.html')
-
-# Registration Feature
-@auth.route('/', methods=['GET', 'POST'])
-def signup():
-    if current_user.is_authenticated:
-        return redirect(url_for('views.home'))
-
-    if request.method == 'POST':
-        data = request.json
-        email = data.get('email')
-        name = data.get('name')
-        password = data.get('password')
-
-        if not email or not name or not password:
-            flash('Please fill in all the fields', category='error')
-            return redirect(url_for('auth.signup'))
-
-        user_email = userinfo.query.filter_by(email=email).first()
-        if user_email:
-            flash('Email already exists', category='error')
-            return jsonify({'message': 'error',
-                            'value': 'Email already in use'})
-
-        user_name = userinfo.query.filter_by(name=name).first()
-        if user_name:
-            flash('Username already exists', category='error')
-            return jsonify({'message': 'error',
-                            'value': 'Username already in use'})
-
-        new_user = userinfo(email=email, name=name, password=generate_password_hash(
-            password, method='sha256'))
-        db.session.add(new_user)
-        db.session.commit()
-        flash('Account created', category='success')
-        # return redirect(url_for('auth.login'))
-        return jsonify({'message': 'success',
-                        'value': 'login'})
-
-    return render_template('index.html')
 
 # Logout Feature
 @auth.route('/logout')
@@ -109,21 +105,24 @@ def authorized():
                             connected=True, key=steam_id)
         db.session.add(platform)
         user.platforms.append(platform)
+        platform_key = steam_id
     else:
         # Update the existing platform with the new values
         existing_platform.connected = True
         existing_platform.key = steam_id
+        platform_key = existing_platform.key
 
-        # Set a session variable to remember that the user has connected their Steam account
-        session["steam_connected"] = existing_platform.connected
+    # Set a session variable to remember that the user has connected their Steam account
+    session["steam_connected"] = True
 
-        # Set fetched to False to force a fetch of owned games
-        existing_platform.fetched = False
+    # Get owned games for the platform
+    get_owned_games(platform_key=platform_key)
 
     # Commit the changes to the database
     db.session.commit()
 
     return redirect(url_for("auth.account"))
+
 
 @auth.route('/steam_disconnect', methods=['POST'])
 @login_required
@@ -136,7 +135,10 @@ def steam_disconnect():
 
     if platform:
         # Delete all user_games associated with the platform
-        UserGame.query.filter_by(platform_id=platform.id).delete()
+        num_deleted = UserGame.query.filter_by(platform_id=platform.id).delete()
+
+        # Delete the games associated with the platform
+        Game.query.filter_by(platform_id=platform.id).delete()
 
         # Delete the platform
         db.session.delete(platform)
@@ -149,23 +151,18 @@ def steam_disconnect():
     return redirect(url_for('auth.account'))
 
 
+
+
 @auth.route('/account')
 @login_required
 def account():
     user_platforms = current_user.platforms
+    
     steam_connected = False
-
     for platform in user_platforms:
         if platform.name == 'Steam' and platform.connected:
             steam_connected = True
-
-            # Check if owned games have been fetched, and fetch them if not
-            if not platform.fetched:
-                get_owned_games(platform_key=platform.key)
-                platform.fetched = True
-                db.session.commit()
-            break
-
-    return render_template('account.html', steam_connected=steam_connected)
+    
+    return render_template('account.html', platforms=user_platforms, steam_connected=steam_connected)
 
 

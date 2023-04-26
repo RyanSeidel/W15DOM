@@ -172,9 +172,10 @@
 
 .sign-text-box{
   padding: 9.6rem;
-  background-color: #b097fc;
+  background-color: rgba(218, 213, 213, 0.20);
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.15);
   border-radius: 12px;
+  border: rgba(51, 51, 51, 0.363) solid 1px;
 }
 .sign-form{
   display: grid;
@@ -223,8 +224,16 @@
 /**************************/
 
 .section-login{
-  background-color: #a5d8ff;
   height: 100vh;
+}
+
+.login-text-box{
+  padding: 9.6rem;
+  background-color: rgba(7, 11, 41, 0.70); 
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.15);
+  border-radius: 12px;
+  border: 7px solid #004299;
+  
 }
 
 .sign{
@@ -451,6 +460,17 @@ div.desc {
 .account p, .account h1, .account form, .account a {
   margin-bottom: 1rem;
 }
+
+.steam-text{
+  color: black;
+  font-weight: 500;
+  padding: .5rem;
+  font-size: 1rem;
+  text-decoration: none;
+  background-color: #fff;
+  border-radius: 6px;
+}
+
 
 /**************************/
 /* Archive Page */
