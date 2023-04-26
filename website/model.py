@@ -1,5 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
+from flask_login import current_user
+
 
 db = SQLAlchemy()
 
@@ -39,8 +41,8 @@ class UserGame(db.Model):
     playtime = db.Column(db.Integer, nullable=True)  # Playtime will store the playtime_forever value from Steam
     owned = db.Column(db.Boolean, default=True)
     user_id = db.Column(db.Integer, db.ForeignKey('userinfo.id'), nullable=False)
-    last_played = db.Column(db.String(20), nullable=True)  # Change to string column with length 20
-    
+    last_played = db.Column(db.DateTime, nullable=True)  # Add a new column for last played date
+    completion_achievements = db.Column(db.Integer, default=0)
     game = db.relationship('Game', backref='user_games')
 
 class Game(db.Model):
@@ -56,6 +58,7 @@ class Game(db.Model):
     recommend = db.Column(db.Boolean, default=None, nullable = True)
     external_id = db.Column(db.String(100))
     image_url = db.Column(db.String(200))
+    total_achievements = db.Column(db.Integer, default=0)  # Add this line
 
 
     platform = db.relationship('Platform', backref=db.backref('games', lazy=True))
@@ -73,18 +76,22 @@ class Game(db.Model):
             'completed': self.completed,
             'recommend': self.recommend,
             'external_id': self.external_id,
-            'image_url': self.image_url  # add to_dict support for new column
+            'image_url': self.image_url,
+            'total_achievements': self.total_achievements
         }
 
-    
     @staticmethod
-    def add_game(user_id, name, platform_id, genre, console, completed, recommend, external_id):
-        existing_game = Game.query.filter_by(user_id=user_id, name=name).first()
+    def add_game(name, platform_id, genre, console, completed, recommend, external_id, image_url, total_achievements):
+        existing_game = Game.query.filter_by(name=name, platform_id=platform_id).first()
         if existing_game:
-            # game with same name already exists for this user
+            # game with same name and platform already exists
             return False
 
-        new_game = Game(user_id=user_id, name=name, platform_id=platform_id, genre=genre,
-                        console=console, completed=completed, recommend=recommend, external_id=external_id)
+        new_game = Game(user_id=current_user.id, name=name, platform_id=platform_id, genre=genre,
+                        console=console, completed=completed, recommend=recommend, external_id=external_id, 
+                        image_url=image_url, total_achievements=total_achievements)
         db.session.add(new_game)
-       
+        db.session.commit()
+        return new_game
+
+

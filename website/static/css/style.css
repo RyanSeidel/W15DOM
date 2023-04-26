@@ -13,8 +13,25 @@
   padding: 0 4.8rem;
   position: relative;
 
+  border-bottom: 7px solid #0066E4;
+  box-sizing: border-box;
+}
+
+
+.header1 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #a5d8ff;
+
+  /* Because we want header to be sticky later */
+  height: 9.6rem;
+  padding: 0 4.8rem;
+  position: relative;
+
   border-bottom: 1px solid black;
   box-sizing: border-box;
+  z-index: 1000;
 }
 
 .logo {
@@ -31,7 +48,7 @@
   align-items: center;
   gap: 4.8rem;
   justify-content: flex-end
-  
+  z-index: 1000;
 }
 .sticky {
   position: fixed;
@@ -94,6 +111,7 @@
   background-color: #a5d8ff;
   padding: 4.8rem 0 9.6rem 0;
   text-align: center;
+  height: 100vh;
 }
 
 .hero {
@@ -104,6 +122,7 @@
   grid-template-columns: 1fr 1fr;
   gap: 9.6rem;
   align-items: center;
+  position:relative
 }
 
 .hero-description {
@@ -111,17 +130,23 @@
   line-height: 1.6;
   margin-bottom: 6.4rem;
 }
+
+.hero-image {
+  position: absolute;
+  top: -10rem;
+  right: -20rem;
+  width: 80rem; /* Adjust the image width as needed */
+  height: auto;
+  border: 1px solid black;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5); /* Adjust the drop shadow as needed */
+}
+
+
 /**************************/
 /* ABOUT US  SECTION */
 /**************************/
-  .section-color {
-  background-color: #a5d8ff;
-  text-align: center;
-}
-
  .about-us-one {
-  max-width: 130rem;
-  padding: 0 3.2rem;
+  padding: 0 4.8rem;
   display: grid;
   grid-template-columns: auto auto;
   align-items: right;
@@ -130,7 +155,6 @@
 .about-text {
   font-size: 4.2rem;
   line-height: 1.6;
-  margin-bottom: 6.4rem;
 }
 /**************************/
 /* Register SECTION */
@@ -148,7 +172,7 @@
 
 .sign-text-box{
   padding: 9.6rem;
-  background-color: #b097fc66;
+  background-color: #b097fc;
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.15);
   border-radius: 12px;
 }
@@ -249,6 +273,32 @@
 }
 
 /**************************/
+/* Spotlight Games SECTION */
+/**************************/
+.gallery-container{
+  display: flex;
+  flex-direction: row;
+}
+div.gallery {
+  margin: 5px;
+  border: 1px solid #ccc;
+}
+
+div.gallery:hover {
+  border: 1px solid #777;
+}
+
+div.gallery img {
+  width: 100%;
+  height: auto;
+}
+
+div.desc {
+  padding: 15px;
+  text-align: center;
+}
+
+/**************************/
 /* Game Timeline Nav */
 /**************************/
 .search-form {
@@ -293,10 +343,10 @@
 }
 
 .game-list {
-  border: 2px solid #333;
+  border: 7px solid #004299;
   padding: 2rem;
   width: 50%;
-  background-color: #a5d8ff;
+  background-color: rgba(0, 134, 239, 0.85);
   display: block; /* Added */
   font-size: 1.4rem;
 }
@@ -308,32 +358,33 @@
 }
 
 .game-list h2 {
-  font-size: 2rem;
+  font-size: 3rem;
   margin-bottom: 1.5rem;
 }
 
 .game {
-  margin-bottom: 2rem; /* Increase spacing between games */
-  padding: 1rem; /* Add padding inside each game */
+  margin-bottom: 4.8rem; /* Increase spacing between games */
+  padding: 2.4rem; /* Add padding inside each game */
   border: 1px solid #333; /* Add a light gray border outline */
   border-radius: 5px; /* Add rounded corners */
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Add a subtle box shadow */
+  background-color: #ffffff14;
 }
 
 .your-games {
-  display: grid;
-  flex-direction: row;
-  align-items: center;
-  font-size: 1.6rem;
-  grid-template-columns: repeat(2, 1fr); 
-  gap: 2rem;
-  font-weight: 500;
-  padding-bottom: 4rem;
-}
+    display: grid;
+    flex-direction: row;
+    align-items: center;
+    font-size: 2rem;
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 2rem;
+    font-weight: 500;
+    padding-bottom: 4rem;
+  }
 
-
-.game-property {
-  flex-basis: calc(50% - 0.25rem);
+.completion-info {
+  display: block;
+  padding: .5rem 0;
 }
 
 .game h3 {
@@ -377,6 +428,11 @@
   text-align: center;
 }
 
+.game-name {
+  color: black;
+  font-size: 2.4rem;
+}
+
 /**************************/
 /* Account Page */
 /**************************/
@@ -388,6 +444,8 @@
   align-items: flex-start;
   justify-content: center;
   text-align: left;
+  background-color: rgba(0, 134, 239, 0.85);
+  border: 7px solid #0066E4;
 }
 
 .account p, .account h1, .account form, .account a {
@@ -402,7 +460,8 @@
   padding: 4.8rem;
   justify-content: center;
   text-align: center;
-  font-size: 1.8rem;
+  font-size: 1rem;
+
 }
 
 .archive{
@@ -411,11 +470,12 @@
 
 #game-form label {
     font-size: 20px; /* Adjust the font size as needed */
+  color: #e9e6e6;
 }
 
 #game-form input[type="text"], 
 #game-form input[type="checkbox"] {
-    width: 10rem; /* Adjust the width as needed */
+    width: 20rem; /* Adjust the width as needed */
     height: 3rem; /* Adjust the height as needed */
     font-size: 1.6rem; /* Adjust the font size as needed */
   }
@@ -426,30 +486,46 @@
 .leaderboard-title {
   padding: 4.8rem;
   text-align: center;
+  font-size: 4.8rem;
+  color: #e9e6e6;
 }
 
-.game-container {
+.leaderboard-games{
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
-  }
+}
+
+.game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 2rem 2.7rem 2.7rem; /* top padding: 1rem; left and right padding: 2rem; bottom padding: 2rem */
+  background-color: rgba(7, 11, 41, 0.70); 
+  margin-bottom: 9.6rem; /* Add some space between each game */
+  border: 7px solid #004299;
+  
+}
 
 .game-info {
     display: flex;
     flex-direction: row;
     align-items: center;
-    font-size: 1.6rem;
+    font-size: 2rem;
     gap: 2rem;
     font-weight: 500;
-    padding-bottom: 4rem;
+    color: #e9e6e6;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
   }
 
-  .game-image {
-    width: 60rem;
-    height: auto;
-    transition: transform 0.3s ease;
-  }
+.game-image {
+  width: 60rem;
+  height: auto;
+  margin-top: 2rem; /* Add margin to create space between the image and the content */
+  transition: transform 0.3s ease;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.85);
+}
 
   .game-image-wrapper {
     padding: .2rem;
@@ -459,15 +535,18 @@
 
   .game-image-wrapper:hover {
     transform: scale(1.1);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.0);
   }
 
   .game-image-wrapper:hover .game-image {
     transform: scale(1);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.0);
   }
 
   .game-container:last-child {
     margin-bottom: 9.6rem; /* Adjust the value according to your preference */
   }
+
 /**************************/
 /* Help Page with the assistance of chatgpt*/
 /**************************/
@@ -496,7 +575,7 @@ h2 {
 
 
 p {
-  font-size: 16px;
+  font-size: 2rem;
   line-height: 1.5;
   margin-bottom: 20px;
 }
@@ -539,9 +618,9 @@ input[type="text"], input[type="email"], input[type="password"] {
 /**************************/
 
 .footer {
-  padding: 12.8rem 0;
-  border-top: 1px solid #eee;
+  padding: 9.6rem 0;
 }
+
 
 .grid--footer {
   grid-template-columns: 1.5fr 1.5fr 1fr 1fr 1fr;
@@ -578,12 +657,14 @@ input[type="text"], input[type="email"], input[type="password"] {
   font-size: 1.8rem;
   font-weight: 500;
   margin-bottom: 4rem;
+  color: black;
 }
 
 .contacts {
   font-style: normal;
   font-size: 1.6rem;
   line-height: 1.6;
+  color: black;
 
 }
 
@@ -608,4 +689,8 @@ input[type="text"], input[type="email"], input[type="password"] {
 
 .footer-link:hover, .footer-link:active{
   color: #555;
+}
+
+.padding{
+  padding: 9.6rem;
 }

@@ -3,9 +3,9 @@
 {% block title %}Archive Page{% endblock %}
 
 {% block content %}
-      <link rel="stylesheet" href="{{ url_for('static', filename='css/vgarchive.css') }}">
-      <script src="{{ url_for('static', filename='vgarchive.js') }}"></script>
-    
+  <body>
+           <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+          <link rel="stylesheet" href="{{ url_for('static', filename='css/vgarchive.css') }}">
 
     <header class="header ">
       <div class="logo-container">
@@ -27,17 +27,17 @@
     </header>
 
     <div class="Game-title">
-    <h1>WI5DOM Game Archive</h1>
+    <h1>WI5DOM Video Game Archive</h1>
     </div>
     <div class="archive">
       <form id="game-form" method="POST" action="{{ url_for('views.archive') }}">
         <input type="hidden" id="game-id" value="">
         <label for="name-input">Name:</label>
-        <input type="text" id="name-input" name="name">
+        <input class="VGName" type="text" id="name-input" name="name">
         <label for="genre-input">Genre:</label>
-        <input type="text" id="genre-input" name="genre">
+        <input class="VGgenre" type="text" id="genre-input" name="genre">
         <label for="console-input">Console:</label>
-        <input type="text" id="console-input" name="console">
+        <input class="VGconsole" type="text" id="console-input" name="console">
         <label for="completed-input">Completed:</label>
         <input type="checkbox" id="completed-input" name="completed">
         <label for="recommend-input">Recommend:</label>

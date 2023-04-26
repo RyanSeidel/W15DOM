@@ -135,10 +135,8 @@ def steam_disconnect():
     platform = Platform.query.filter_by(user_id=user.id, name='Steam').first()
 
     if platform:
-        # Delete all games associated with the platform
-        for game in platform.games:
-            UserGame.query.filter_by(game_id=game.id).delete()
-            db.session.delete(game)
+        # Delete all user_games associated with the platform
+        UserGame.query.filter_by(platform_id=platform.id).delete()
 
         # Delete the platform
         db.session.delete(platform)

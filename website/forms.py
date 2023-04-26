@@ -20,17 +20,4 @@ class SearchForm(FlaskForm):
     submit = SubmitField('Submit')
     search_filter = SelectField('Filter', choices=[('name', 'Name'), ('genre', 'Genre'), ('console', 'Console')])
 
-class AddGameForm(FlaskForm):
-    name = StringField('Name', validators=[DataRequired(), Length(max=100)])
-    description = TextAreaField('Description', validators=[Optional(), Length(max=500)])
-    image_url = StringField('Image URL', validators=[Optional(), URL()])
-    console = SelectField('Console', choices=[('pc', 'PC'), ('ps4', 'PlayStation 4'), ('xbox', 'Xbox One')])
-    is_steam = SelectField('Is Steam', choices=[(True, 'Yes'), (False, 'No')])
-    submit = SubmitField('Add Game')
-
-    def validate_name(self, name):
-        if len(name.data) < 2:
-            raise ValidationError('Name must be at least 2 characters long.')
-        if len(name.data) > 100:
-            raise ValidationError('Name cannot be longer than 100 characters.')
 

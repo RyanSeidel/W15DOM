@@ -3,6 +3,21 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
+<style>
+#btn{
+  border: none;
+  border-radius: 9px;
+  color: #fdf2eg;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 5px;
+  transition: all 0.2s ease-in-out;
+  margin-left: 10px;
+  height: 15%;
+ 
+  
+} 
+</style>
   <header class="header ">
     <div class="logo-container">
       <a href="#">
@@ -36,7 +51,7 @@
     <form action="{{ url_for('auth.steam_disconnect') }}" method="post">
       <input type="hidden" name="_method" value="DELETE">
       <img src="{{ url_for('static', filename='images/steam-icon.png') }}" alt="Steam Icon" style="width: 3.5rem; height: 3.5rem; vertical-align: middle; margin-right: 1rem;">
-      <button type="submit">Disconnect Steam Account</button>
+      <button type="submit" id="btn">Disconnect Steam Account</button>
     </form>
   {% else %}
     <p>Not connected to Steam</p>

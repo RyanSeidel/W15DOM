@@ -6,7 +6,7 @@
 {% block content %}
 
   <body>
-    <header class="header sticky">
+    <header class="header1 sticky">
       <a href="#home">
         <img class="logo" alt="W15DOM logo" src="{{ url_for('static', filename='images/w15domlogo.png') }}" />
       </a>
@@ -26,32 +26,62 @@
           A fun way to collect your games!
             </h1>
         <div class="hero">
-          <div class="hero-text-box">
-            
-            <p class="hero-description">Starting being a game pro by managing your data!
-            </p>
-            <a href="#signup" class="btn btn--full margin-right-sm"
-              >Sign up Now!</a>
-            <a href="#aboutus" class="btn btn--outline">Learn more &darr;</a>
-          </div>
+<div class="hero-text-box">
+  <div class="hero-description-container">
+    <p class="hero-description">Starting being a game pro by managing your data!</p>
+    <img class="hero-image" src="{{ url_for('static', filename='images/timeline.PNG') }}" alt="demo"/>
+  </div>
+  <a href="#signup" class="btn btn--full margin-right-sm">Sign up Now!</a>
+  <a href="#aboutus" class="btn btn--outline">Learn more &darr;</a>
+</div>
         </div>
         </section>
 
-        <section class="section-color features">
-          <div class="container-line container-4">
-            <div class="about-us-one">
+        <section class="features" id="spotlight">
+          <div class="container section-color">
               <div class="about-text">
-          <span> SPOTLIGHT GAME : LEAGUEEE</span>
-        </div>
-        </div>
-        </div>
-        </section>
+          <span> Spotlight Games!</span>
+              </div>
+                     <!-- CS BOX in here  -->
+            <div class="gallery-container">
+            <div class="gallery">
+  <a target="_blank" >
+    <img src="{{ url_for('static', filename='images/arksurvivalworld.jpg') }}" alt="one" width="600" height="400">
+  </a>
+</div>
 
-        
+<div class="gallery">
+  <a target="_blank" >
+    <img src="{{ url_for('static', filename='images/deadbydaylight.jpeg') }}" alt="two" width="600" height="400">
+  </a>
+</div>
+
+<div class="gallery">
+  <a target="_blank" >
+    <img src="{{ url_for('static', filename='images/warframelastwish.jpeg') }}" alt="three" width="600" height="400">
+  </a>
+</div>
+
+<div class="gallery">
+  <a target="_blank" >
+    <img src="{{ url_for('static', filename='images/flightsimulatorx.jpeg') }}" alt="four" width="600" height="400">
+  </a>
+  </div>
+  
+  <div class="gallery">
+  <a target="_blank" >
+    <img src="{{ url_for('static', filename='images/valheim.jpeg') }}" alt="five" width="600" height="400">
+  </a>
+  </div>
+            </div>
+      
+      </div>
+</section>
 
       
-        <section class="section-color" id="signup">
-          <div class="container-line">
+      
+        <section id="signup">
+          <div class="container section-color">
             <div class="sign">
               <div class="sign-text-box">
                 <h2 class="heading-secondary">Register Account</h2>
@@ -74,11 +104,11 @@
                 </form>
               </div>                
           </div>
-         </section>
+            </section>
               
 
-<section class="section-color" id="aboutus">
-          <div class="container-line container-3">
+<section id="aboutus">
+          <div class="container container-line section-color">
             <div class="about-us-one">
               <div class="about-text">
                 <section>
@@ -97,9 +127,15 @@
         </div>
         </div>
         </section> 
+          
 
-        <footer class="footer">
-          <div class="container grid grid--footer">
+          </div>
+        </div>
+        </div>
+        </div>
+        </section> 
+            <footer class="footer ">
+          <div class="container container-3 grid grid--footer ">
             <div class="logo-col">
               <a href="#" class="footer-logo">
                 <img class="logo" alt="W15DOM logo" src="{{ url_for('static', filename='images/w15domlogo.png') }}" />
@@ -114,35 +150,36 @@
             <div class="address-col">
               <p class="footer-heading">Contact us</p>
               <address class="contacts">
-              <p class="address">623 Harrison St., 2nd Floor, San Francisco, CA 94107</p>
+              <p class="address">1301 E Anderson Ln, Suite 200, Austin, TX 78752</p>
               <p>
-              <a class="footer-link" href="tel:415-201-6370">415-201-6370</a><br />
-              <a class="footer-link" href="mailto:hello@omnifood.com">hello@omnifood.com</a>
+              <a class="footer-link" href="tel:415-201-6370">123-456-7890</a><br />
+              <a class="footer-link" href="mailto:hello@omnifood.com">WI5DOM@help.com</a>
               </p>
             </address>
             </div>
             <nav class="nav-col">
               <p class="footer-heading">Account</p>
               <ul class="footer-nav">
-                <li><a class="footer-link" href="#">Create account</a></li>
-                <li><a class="footer-link" href="#">Sign in</a></li>
+                <li><a class="footer-link" href="#signup">Create account</a></li>
+                <li><a class="footer-link" href="/login">Sign in</a></li>
               </ul>
             </nav>
             <nav class="nav-col">
               <p class="footer-heading">Company</p>
               <ul class="footer-nav">
-                <li><a class="footer-link" href="#">About W15DOM</a></li>
+                <li><a class="footer-link" href="#aboutus">About W15DOM</a></li>
               </ul>
             </nav>
             <nav class="nav-col">
               <p class="footer-heading">Resources</p>
               <ul class="footer-nav">
-                <li><a class="footer-link" href="#">Help center</a></li>
-                <li><a  class="footer-link" href="#">Privacy & terms</a></li>
+                <li><a class="footer-link" href="#aboutus">Help center</a></li>
+                <li><a  class="footer-link" href="#aboutus">Privacy & terms</a></li>
               </ul>
             </nav>
           </div>
-        </footer>              
+        </footer>
+                      
 </body>
 </html>
 

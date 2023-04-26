@@ -1,6 +1,6 @@
 /* Set the font family and size for the whole page */
 body {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: "Rubik", sans-serif;
   font-size: 16px;
   line-height: 1.6;
   color: #444;
@@ -8,7 +8,7 @@ body {
 }
 
 /* Set a max-width for the content area */
-.container {
+.container-a {
   max-width: 960px;
   margin: 0 auto;
   padding: 0 20px;
@@ -17,23 +17,22 @@ body {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Add a header with a background color and white text */
-header {
-  background-color: #3c80f6;
-  color: #fff;
-  padding: 20px;
-  text-align: center;
-  border-radius: 3px 3px 0 0;
-}
 
 /* Style the h1 in the header */
-header h1 {
-  margin: 0;
-  font-size: 36px;
+h1 {
+  position: relative;
+  display: inline-block;
+  text-decoration: none;
+  color: #e9e6e6;
+  font-weight: 500;
+  font-size: 8rem;
+  transition: all 0.3s;
+  
+  
 }
 
 /* Add some space between the header and the table */
-header + table {
+table {
   margin-top: 40px;
 }
 
@@ -88,7 +87,6 @@ input[type="text"], input[type="checkbox"] {
   border-radius: 5px;
   background-color: #f2f2f2;
   transition: all 0.2s ease-in-out;
-  width: 10%;
   box-sizing: border-box;
 }
 
@@ -106,7 +104,10 @@ label {
   font-weight: bold;
   display: block;
   margin-bottom: 5px;
+  
 }
+
+
 
 /* Style the form submit button */
 .submit {
@@ -123,7 +124,7 @@ label {
   
 }
 
-input[type="submit"]:hover {
+.submit:hover {
   background-color: #2975d9;
 }
 

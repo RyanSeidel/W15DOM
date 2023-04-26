@@ -43,8 +43,8 @@
       <div class="game-info">
         <div>Rank: {{ loop.index }}</div>
         <div>Playtime: {{ game.total_playtime }} mins</div>
-        <div>Total Likes: {{ game.total_likes }}</div>
-        <div>Total Dislikes: {{ game.total_dislikes }}</div>
+        <div><i class="fa-solid fa-thumbs-up icon-large"></i>  {{ game.total_likes }}</div>
+        <div><i class="fa-solid fa-thumbs-down icon-large"></i>  {{ game.total_dislikes }}</div>
       </div>
     </div>
     {% endfor %}
