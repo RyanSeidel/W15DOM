@@ -1,16 +1,20 @@
+# auth.py
+
+# Code description: This file contains the code for the signup page. It checks if the user already exists in the database and if not, it creates a new user. It also checks if the email or username already exists in the database. If it does, it will flash an error message and redirect the user to the signup page. If the user is successfully created, it will redirect the user to the home page.
+
+
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, session, make_response
 from flask_login import login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from website.model import db, userinfo, Game, UserGame, Platform
+from website.model import userinfo, Game, UserGame, Platform, db
 from website.steam import steam_api, api_key, get_owned_games
 import requests
 from sqlalchemy import exists, and_
-from .forms import SignupForm
+from website.forms import SignupForm
 
 
 
 auth = Blueprint('auth', __name__)
-
 
 
 @auth.route('/', methods=['GET', 'POST'])
@@ -25,6 +29,7 @@ def signup():
         name = form.name.data
         password = form.password.data
 
+        # Check if email or name already exists in the database
         user_email = userinfo.query.filter_by(email=email).first()
         if user_email:
             flash('Email already exists', category='error')
@@ -35,13 +40,19 @@ def signup():
             flash('Username already exists', category='error')
             return redirect(url_for('auth.signup'))
 
-        new_user = userinfo(email=email, name=name, password=generate_password_hash(
-            password, method='sha256'))
-        db.session.add(new_user)
-        db.session.commit()
-
-        flash('Account created', category='success')
-        return redirect(url_for('auth.login'))
+        # Create a new userinfo object and add it to the database
+        new_user = userinfo(email=email, name=name, password=generate_password_hash(password, method='sha256'))
+        
+        try:
+            db.session.add(new_user)
+            db.session.commit()
+            flash('Account created', category='success')
+            return redirect(url_for('auth.login'))
+        except Exception as e:
+            print(str(e))
+            db.session.rollback()
+            flash('An error occurred while creating your account. Please try again later', category='error')
+            return redirect(url_for('auth.signup'))
 
     return render_template('index.html', form=form)
 

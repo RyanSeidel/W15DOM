@@ -87,7 +87,7 @@
                 <h2 class="heading-secondary">Register Account</h2>
               
               <div>
-                <form class="sign-form" id="signup-form" method="POST" action="#">
+                <form class="sign-form" id="signup-form" method="POST" action="{{ url_for('auth.signup') }}">
                   <div>
                     <label for="email">Email<br></label>
                     <input id="email" name="email" type="text" class="email-field" placeholder="ex: me@example.com" required>

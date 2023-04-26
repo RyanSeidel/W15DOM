@@ -16,6 +16,8 @@ def create_app():
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['STEAM_API_KEY'] = '4A26AAF6AC8E26A257000E3F51E3AF2B'
     app.config['SQLALCHEMY_ECHO'] = False
+    app.config['DEBUG'] = True
+
 
     app.steam_api = steam.webapi.WebAPI(app.config['STEAM_API_KEY'])
 

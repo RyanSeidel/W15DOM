@@ -2,6 +2,9 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from flask_login import current_user
 
+# model.py 
+
+# defintion: contains the models userinfo, platform, games, and usergames
 
 db = SQLAlchemy()
 

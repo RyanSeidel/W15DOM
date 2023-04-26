@@ -1,3 +1,7 @@
+# Filename: steam.py
+
+# Code description: Used to get the steam games connected with API key and steam ID. Also used to get the genre of the game.
+
 from website.model import Game, UserGame, Platform, userinfo, db
 import steam.webapi
 from flask import flash
@@ -6,6 +10,7 @@ import requests
 import json
 
 
+# Steam API Key
 
 api_key = "4A26AAF6AC8E26A257000E3F51E3AF2B"
 steam_api = steam.webapi.WebAPI(api_key)
